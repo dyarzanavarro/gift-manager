@@ -27,10 +27,10 @@ useSeoMeta({
 
 <template>
   <UApp>
-   
-
     <UMain>
-      <NuxtPage />
+      <NuxtLayout>
+        <NuxtPage />
+      </NuxtLayout>
     </UMain>
 
     <USeparator />

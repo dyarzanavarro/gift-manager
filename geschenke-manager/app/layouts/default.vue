@@ -3,8 +3,8 @@
     <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur">
       <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <img src="/gift-icon.svg" class="h-6 w-6" />
-          <span class="font-medium text-sm">Geschenke-Manager</span>
+<!-- img here-->         
+  <span class="font-medium text-sm">Geschenke-Manager</span>
         </div>
 
         <input
