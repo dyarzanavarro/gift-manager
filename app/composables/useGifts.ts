@@ -15,9 +15,20 @@ export const useGifts = () => {
         })
     }
 
+    const updateGift = (id: number, payload: Omit<GiftIdea, 'id'>) => {
+        const index = gifts.value.findIndex(g => g.id === id)
+        if (index === -1) return
+        gifts.value[index] = { id, ...payload }
+    }
+
+    const deleteGift = (id: number) => {
+        gifts.value = gifts.value.filter(g => g.id !== id)
+    }
+
     return {
         gifts,
-        addGift
+        addGift,
+        updateGift
     }
 
 
