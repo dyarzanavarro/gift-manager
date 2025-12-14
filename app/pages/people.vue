@@ -90,124 +90,140 @@ const formatBirthday = (value?: string) => {
       description="Verwalte Personen, Geburtstage und Notizen."
     />
 
-    <UContainer class="space-y-6
-">
+    <UContainer class="space-y-6">
 
       <!-- PERSON TABLE -->
       <UCard>
         <template #header>
           <div class="flex items-center justify-between">
-            <h2 class="text-sm font-medium">Personen</h2>
-             <div class="flex justify-end">
-        <UButton icon="i-heroicons-plus" color="orange" variant="solid" @click="onCreate">
-          Neue Person
-        </UButton>
-      </div>
+            <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+              Personen
+            </h2>
+            <div class="flex justify-end">
+              <UButton
+                icon="i-heroicons-plus"
+                color="primary"
+                variant="solid"
+                @click="onCreate"
+              >
+                Neue Person
+              </UButton>
+            </div>
           </div>
-          
         </template>
 
-      <UTable :data="people" :columns="columns">
-  <!-- Geburtstag -->
- <template #birthday-cell="{ row }">
-  <span v-if="row.original.birthday">
-    {{ formatBirthday(row.original.birthday) }}
-  </span>
-  <span v-else class="text-slate-500 italic">–</span>
-</template>
-  <!-- Notizen -->
-  <template #notes-cell="{ row }">
-    <span class="text-slate-400">
-      {{ row.original.notes || '–' }}
-    </span>
-  </template>
+        <UTable :data="people" :columns="columns">
+          <!-- Geburtstag -->
+          <template #birthday-cell="{ row }">
+            <span v-if="row.original.birthday">
+              {{ formatBirthday(row.original.birthday) }}
+            </span>
+            <span
+              v-else
+              class="italic text-gray-500 dark:text-gray-400"
+            >
+              –
+            </span>
+          </template>
 
-  <!-- Aktionen -->
-  <template #actions-cell="{ row }">
-    <div class="flex gap-2 justify-end">
-      <UButton
-        size="xs"
-        color="gray"
-        icon="i-heroicons-pencil-square"
-        @click="onEdit(row.original)"
-      >
-        Bearbeiten
-      </UButton>
+          <!-- Notizen -->
+          <template #notes-cell="{ row }">
+            <span class="text-gray-700 dark:text-gray-300">
+              {{ row.original.notes || '–' }}
+            </span>
+          </template>
 
-      <UButton
-        size="xs"
-        color="red"
-        variant="soft"
-        icon="i-heroicons-trash"
-        @click="onDelete(row.original)"
-      >
-        Löschen
-      </UButton>
-    </div>
-  </template>
-</UTable>
+          <!-- Aktionen -->
+          <template #actions-cell="{ row }">
+            <div class="flex gap-2 justify-end">
+              <UButton
+                size="xs"
+                color="primary"
+                variant="soft"
+                icon="i-heroicons-pencil-square"
+                @click="onEdit(row.original)"
+              >
+                Bearbeiten
+              </UButton>
+
+              <UButton
+                size="xs"
+                color="primary"
+                variant="ghost"
+                icon="i-heroicons-trash"
+                @click="onDelete(row.original)"
+              >
+                Löschen
+              </UButton>
+            </div>
+          </template>
+        </UTable>
       </UCard>
 
-   <!-- PERSON MODAL & FORM -->
-<UModal v-model:open="isOpen" :ui="{ width: 'sm:max-w-xl' }">
-  <template #content>
-    <UCard class="w-full max-w-xl mx-auto space-y-4">
-      <template #header>
-        <h3 class="text-lg font-medium">
-          {{ isEditing ? 'Person bearbeiten' : 'Neue Person anlegen' }}
-        </h3>
-      </template>
+      <!-- PERSON MODAL & FORM -->
+      <UModal v-model:open="isOpen" :ui="{ width: 'sm:max-w-xl' }">
+        <template #content>
+          <UCard class="w-full max-w-xl mx-auto space-y-4">
+            <template #header>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                {{ isEditing ? 'Person bearbeiten' : 'Neue Person anlegen' }}
+              </h3>
+            </template>
 
-      <form class="space-y-4" @submit.prevent="onSubmit">
-        <div class="space-y-1">
-          <label class="text-xs font-medium text-gray-300">
-            Name
-          </label>
-          <UInput
-            v-model="form.name"
-            placeholder="Name eingeben"
-            class="w-full"
-          />
-        </div>
+            <form class="space-y-4" @submit.prevent="onSubmit">
+              <div class="space-y-1">
+                <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Name
+                </label>
+                <UInput
+                  v-model="form.name"
+                  placeholder="Name eingeben"
+                  class="w-full"
+                />
+              </div>
 
-        <div class="space-y-1">
-          <label class="text-xs font-medium text-gray-300">
-            Geburtstag
-          </label>
-          <UInput
-            v-model="form.birthday"
-            type="date"
-            class="w-full"
-          />
-        </div>
+              <div class="space-y-1">
+                <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Geburtstag
+                </label>
+                <UInput
+                  v-model="form.birthday"
+                  type="date"
+                  class="w-full"
+                />
+              </div>
 
-        <div class="space-y-1">
-          <label class="text-xs font-medium text-gray-300">
-            Notizen
-          </label>
-          <UTextarea
-            v-model="form.notes"
-            :rows="3"
-            placeholder="Vorlieben, No-Gos, Hinweise..."
-            class="w-full"
-          />
-        </div>
+              <div class="space-y-1">
+                <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Notizen
+                </label>
+                <UTextarea
+                  v-model="form.notes"
+                  :rows="3"
+                  placeholder="Vorlieben, No-Gos, Hinweise..."
+                  class="w-full"
+                />
+              </div>
 
-        <div class="flex justify-end gap-2 pt-3">
-          <UButton color="gray" variant="soft" type="button" @click="isOpen = false">
-            Abbrechen
-          </UButton>
+              <div class="flex justify-end gap-2 pt-3">
+                <UButton
+                  color="gray"
+                  variant="soft"
+                  type="button"
+                  @click="isOpen = false"
+                >
+                  Abbrechen
+                </UButton>
 
-          <UButton color="orange" type="submit">
-            {{ isEditing ? 'Speichern' : 'Hinzufügen' }}
-          </UButton>
-        </div>
-      </form>
-    </UCard>
-  </template>
-</UModal>
+                <UButton color="primary" type="submit">
+                  {{ isEditing ? 'Speichern' : 'Hinzufügen' }}
+                </UButton>
+              </div>
+            </form>
+          </UCard>
+        </template>
+      </UModal>
 
     </UContainer>
-
   </UPage>
 </template>
