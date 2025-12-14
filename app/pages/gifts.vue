@@ -96,7 +96,49 @@ const onCreate = () => {
   isOpen.value = true
 };
 
-// TODO: implement edit and delete handlers and onSubmit function
+const onEdit = (row: GiftRow) => {
+  isEditing.value = true
+  editedId.value = row.id
+  form.personId = row.personId
+  form.title = row.title
+  form.notes = row.notes ?? ''
+  form.occasion = row.occasion
+  form.status = row.status
+  isOpen.value = true
+}
+
+const onDelete = (row: GiftRow) => {
+  if (confirm(`Geschenkidee "${row.title}" wirklich löschen?`)) {
+    deleteGift(row.id)
+  }
+}
+
+const onSubmit = () => {
+  if (!form.title.trim()) {
+    alert('Bitte einen Titel angeben.')
+    return
+  }
+  if (!form.personId) {
+    alert('Bitte eine Person auswählen.')
+    return
+  }
+
+  const payload: Omit<GiftIdea, 'id'> = {
+    personId: form.personId,
+    title: form.title.trim(),
+    notes: form.notes.trim() || undefined,
+    occasion: form.occasion.trim() || 'Allgemein',
+    status: form.status
+  }
+
+  if (isEditing.value && editedId.value !== null) {
+    updateGift(editedId.value, payload)
+  } else {
+    addGift(payload)
+  }
+
+  isOpen.value = false
+}
 </script>
 
 
@@ -128,9 +170,7 @@ const onCreate = () => {
         </UButton>
       </div>
 
-          </div>
-             <!-- ACTION BAR -->
-      
+          </div>    
 
         </template>
 
@@ -174,7 +214,7 @@ const onCreate = () => {
       </UCard>
 
        <!-- GIFT MODAL & FORM -->
-      <UModal v-model:open="isOpen" :ui="{ width: 'sm:max-w-xl' }">
+     <UModal v-model:open="isOpen" :ui="{ width: 'sm:max-w-xl' }">
         <template #content>
           <UCard class="w-full max-w-xl mx-auto space-y-4">
             <template #header>
@@ -182,6 +222,87 @@ const onCreate = () => {
                 {{ isEditing ? 'Geschenkidee bearbeiten' : 'Neue Geschenkidee anlegen' }}
               </h3>
             </template>
+
+            <form class="space-y-4" @submit.prevent="onSubmit">
+              <!-- Person -->
+              <div class="space-y-1">
+                <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Person
+                </label>
+                <USelect
+                  v-model="form.personId"
+                  :options="personOptions"
+                  value-attribute="value"
+                  option-attribute="label"
+                  placeholder="Person auswählen"
+                />
+              </div>
+
+              <!-- Titel -->
+              <div class="space-y-1">
+                <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Titel
+                </label>
+                <UInput
+                  v-model="form.title"
+                  placeholder="z. B. Bluetooth-Kopfhörer"
+                  class="w-full"
+                />
+              </div>
+
+              <!-- Anlass -->
+              <div class="space-y-1">
+                <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Anlass
+                </label>
+                <UInput
+                  v-model="form.occasion"
+                  placeholder="z. B. Geburtstag, Weihnachten"
+                  class="w-full"
+                />
+              </div>
+
+              <!-- Status -->
+              <div class="space-y-1">
+                <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Status
+                </label>
+                <USelect
+                  v-model="form.status"
+                  :options="statusOptions"
+                  value-attribute="value"
+                  option-attribute="label"
+                />
+              </div>
+
+              <!-- Notizen -->
+              <div class="space-y-1">
+                <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Notizen
+                </label>
+                <UTextarea
+                  v-model="form.notes"
+                  :rows="3"
+                  placeholder="Details, Vorlieben, Links, Budget..."
+                  class="w-full"
+                />
+              </div>
+
+              <div class="flex justify-end gap-2 pt-3">
+                <UButton
+                  color="neutral"
+                  variant="soft"
+                  type="button"
+                  @click="isOpen = false"
+                >
+                  Abbrechen
+                </UButton>
+
+                <UButton color="primary" type="submit">
+                  {{ isEditing ? 'Speichern' : 'Hinzufügen' }}
+                </UButton>
+              </div>
+            </form>
           </UCard>
         </template>
       </UModal>
