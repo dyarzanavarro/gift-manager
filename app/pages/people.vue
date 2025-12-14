@@ -90,8 +90,8 @@ const formatBirthday = (value?: string) => {
       description="Verwalte Personen, Geburtstage und Notizen."
     />
 
-    <UContainer class="space-y-6">
-
+    <UContainer class="space-y-6
+">
 
       <!-- PERSON TABLE -->
       <UCard>

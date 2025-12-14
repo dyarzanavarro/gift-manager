@@ -4,7 +4,7 @@
       <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-2">
 <!-- img here-->         
-  <span class="font-medium text-sm">Geschenke-Manager</span>
+<nuxt-link class="font-medium text-sm" to="/">Geschenke-Manager</nuxt-link>  
         </div>
 
         <input
