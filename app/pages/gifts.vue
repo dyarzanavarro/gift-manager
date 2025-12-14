@@ -14,14 +14,23 @@ interface GiftRow extends GiftIdea {
 }
 
 const rows = computed<GiftRow[]>(() => {
-  return gifts.value.map(g => {
-    const person = people.value.find(p => p.id === g.personId);
+  const list = gifts.value.map(g => {
+    const person = people.value.find(p => p.id === g.personId)
     return {
       ...g,
-      personName: person ? person.name : 'Unbekannt'
-    };
-  });
-});
+      personName: person?.name ?? 'Unbekannt'
+    }
+  })
+
+  // sort after person name and title
+  return list.sort((a, b) => {
+    const nameCompare = a.personName.localeCompare(b.personName, 'de-CH')
+    if (nameCompare !== 0) return nameCompare
+
+    // if same person, sort by title
+    return a.title.localeCompare(b.title, 'de-CH')
+  })
+})
 
 const personItems = computed<SelectItem[]>(() =>
   people.value.map(p => ({
