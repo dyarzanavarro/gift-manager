@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
 import type { GiftIdea, GiftStatus } from '~/models/gift';
+import type { SelectItem } from '@nuxt/ui'
 
 
 
@@ -22,14 +23,14 @@ const rows = computed<GiftRow[]>(() => {
   });
 });
 
-const personOptions = computed(() => 
-    people.value.map(p => ({
-        label: p.name,
-        value: p.id
-    }))
+const personItems = computed<SelectItem[]>(() =>
+  people.value.map(p => ({
+    label: p.name,
+    value: p.id
+  }))
 );
 
-const statusOptions = [
+const statusItems: SelectItem[] = [
   { label: 'Idee', value: 'idea' },
   { label: 'Geplant', value: 'planned' },
     { label: 'Gekauft', value: 'bought' },
@@ -231,7 +232,7 @@ const onSubmit = () => {
                 </label>
                 <USelect
                   v-model="form.personId"
-                  :options="personOptions"
+                  :items="personItems"
                   value-attribute="value"
                   option-attribute="label"
                   placeholder="Person auswählen"
@@ -263,17 +264,16 @@ const onSubmit = () => {
               </div>
 
               <!-- Status -->
-              <div class="space-y-1">
-                <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Status
-                </label>
-                <USelect
-                  v-model="form.status"
-                  :options="statusOptions"
-                  value-attribute="value"
-                  option-attribute="label"
-                />
-              </div>
+          <div class="space-y-1">
+  <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+    Status
+  </label>
+  <USelect
+    v-model="form.status"
+    :items="statusItems"
+    class="w-full"
+  />
+</div>
 
               <!-- Notizen -->
               <div class="space-y-1">
