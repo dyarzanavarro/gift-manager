@@ -25,10 +25,29 @@ export const useGifts = () => {
         gifts.value = gifts.value.filter(g => g.id !== id)
     }
 
+    const getGiftsByPerson = (personId: number) => {
+        computed(() =>
+            gifts.value.filter(gift => gift.personId === personId)
+        )
+    }
+
+    const setStatus = (id: number, status: GiftStatus) => {
+        const gift = gifts.value.find(g => g.id === id)
+        if (!gift) return
+        gift.status = status
+    }
+
+
+
+
+
     return {
         gifts,
         addGift,
-        updateGift
+        updateGift,
+        deleteGift,
+        getGiftsByPerson,
+        setStatus
     }
 
 
