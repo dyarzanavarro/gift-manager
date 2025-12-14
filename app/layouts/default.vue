@@ -7,6 +7,16 @@
 <nuxt-link class="font-medium text-sm" to="/">Geschenke-Manager</nuxt-link>  
         </div>
 
+        <nuxt-link
+          to="/gifts"
+          class="text-sm font-medium text-slate-300 hover:text-slate-100"
+          >Geschenkideen</nuxt-link>
+
+          <nuxt-link
+          to="/people"
+          class="text-sm font-medium text-slate-300 hover:text-slate-100"
+          >Personen</nuxt-link>
+
         <input
           type="text"
           placeholder="Suchen..."
