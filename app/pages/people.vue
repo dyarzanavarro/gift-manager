@@ -93,7 +93,9 @@ const formatBirthday = (value?: string) => {
     <UContainer class="space-y-6">
 
       <!-- PERSON TABLE -->
-      <UCard>
+      <UCard
+             class="bg-white dark:bg-gray-900 shadow-sm">
+>
         <template #header>
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">

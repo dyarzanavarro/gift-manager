@@ -7,7 +7,7 @@ import { link } from '#build/ui';
 
 
 const { gifts, addGift, updateGift, deleteGift } = useGifts();
-
+ 
 const { people } = usePeople();
 
 //show gift per person
@@ -176,13 +176,15 @@ const onSubmit = () => {
   <UPage>
     <UPageHeader
       title="Geschenkideen"
+      class="text-gray-900 dark:text-gray-100"
       description="Verwalte Geschenkideen, Zuordnungen zu Personen, Anlässen und Status."
     />
 
     <UContainer class="space-y-6">
 
    
-       <UCard>
+       <UCard
+       class="bg-white dark:bg-gray-900 shadow-sm">
         <template #header>
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
