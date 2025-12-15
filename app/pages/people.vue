@@ -135,7 +135,7 @@ const formatBirthday = (value?: string) => {
 
           <!-- Aktionen -->
           <template #actions-cell="{ row }">
-            <div class="flex gap-2 justify-end">
+            <div class="flex gap-2">
               <UButton
                 size="xs"
                 color="primary"

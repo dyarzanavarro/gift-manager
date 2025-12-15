@@ -7,4 +7,6 @@ export interface GiftIdea {
     notes?: string
     occasion: string
     status: GiftStatus
+    link?: string
+    imageUrl?: string
 }

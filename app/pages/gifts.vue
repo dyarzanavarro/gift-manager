@@ -2,10 +2,12 @@
 import type { TableColumn } from '@nuxt/ui';
 import type { GiftIdea, GiftStatus } from '~/models/gift';
 import type { SelectItem } from '@nuxt/ui'
+import { link } from '#build/ui';
 
 
 
 const { gifts, addGift, updateGift, deleteGift } = useGifts();
+
 const { people } = usePeople();
 
 //show gift per person
@@ -50,20 +52,28 @@ const columns: TableColumn<GiftRow>[] = [
   {
     accessorKey: 'title',
     header: 'Geschenkidee'
-  },
-  {
+    },
+    {
     accessorKey: 'personName',
     header: 'Person'
-  },
-  {
+    },
+    {
     accessorKey: 'occasion',
     header: 'Anlass'
-  },
-  {
+    },
+    {
     accessorKey: 'status',
     header: 'Status'
-  },
-  {
+    },
+    {
+    accessorKey: 'link',
+    header: 'Link'
+    },
+    {
+    accessorKey: 'imageUrl',
+    header: 'Bild'
+    },
+   {
     id: 'actions',
     header: 'Aktionen'
   }
@@ -77,27 +87,33 @@ const editedId = ref<number | null>(null);
 type GiftForm = {
   title: string;
     personId: number | null;
-  notes: string;
-  occasion: string;
+    notes: string;
+    occasion: string;
     status: GiftStatus;
+    link: string;
+    imageUrl: string;
 };
 
 const form = reactive<GiftForm>({
   title: '',
     personId: null,
-  notes: '',
-  occasion: '',
-    status: 'idea'
+    notes: '',
+    occasion: '',
+    status: 'idea',
+    link: '',
+    imageUrl: ''
 });
 
 const resetForm = () => {
-  isEditing.value = false
-  editedId.value = null
-  form.personId = null
-  form.title = ''
-  form.notes = ''
-  form.occasion = ''
-  form.status = 'idea'
+    isEditing.value = false
+    editedId.value = null
+    form.personId = null
+    form.title = ''
+    form.notes = ''
+    form.occasion = ''
+    form.status = 'idea'
+    form.link = ''
+    form.imageUrl = ''
 }
 
 const onCreate = () => {
@@ -107,14 +123,16 @@ const onCreate = () => {
 };
 
 const onEdit = (row: GiftRow) => {
-  isEditing.value = true
-  editedId.value = row.id
-  form.personId = row.personId
-  form.title = row.title
-  form.notes = row.notes ?? ''
-  form.occasion = row.occasion
-  form.status = row.status
-  isOpen.value = true
+    isEditing.value = true
+    editedId.value = row.id
+    form.personId = row.personId
+    form.title = row.title
+    form.notes = row.notes ?? ''
+    form.occasion = row.occasion
+    form.status = row.status
+    form.link = row.link ?? ''
+    form.imageUrl = row.imageUrl ?? ''
+    isOpen.value = true
 }
 
 const onDelete = (row: GiftRow) => {
@@ -138,7 +156,9 @@ const onSubmit = () => {
     title: form.title.trim(),
     notes: form.notes.trim() || undefined,
     occasion: form.occasion.trim() || 'Allgemein',
-    status: form.status
+    status: form.status,
+    link: form.link.trim() || undefined,
+    imageUrl: form.imageUrl.trim() || undefined,
   }
 
   if (isEditing.value && editedId.value !== null) {
@@ -218,8 +238,68 @@ const onSubmit = () => {
             </UBadge>
           </template>
 
+            <!-- Link -->
+  <template #link-cell="{ row }">
+    <div class="flex justify-start">
+      <span v-if="row.original.link">
+        <UButton
+          color="primary"
+          variant="ghost"
+          size="xs"
+          icon="i-heroicons-link"
+          :to="row.original.link"
+          target="_blank"
+        >
+          Link
+        </UButton>
+      </span>
+      <span v-else class="text-gray-500 dark:text-gray-400 text-xs">
+        {{ row.original.link || '–' }}
+      </span>
+    </div>
+  </template>
+
+  <!-- Bild -->
+  <template #imageUrl-cell="{ row }">
+    <div class="flex justify-start">
+      <span v-if="row.original.imageUrl">
+        <UAvatar
+          :src="row.original.imageUrl"
+          alt="Bild zur Geschenkidee"
+          size="xs"
+          class="border border-gray-200 dark:border-gray-700"
+        />
+      </span>
+      <span v-else class="text-gray-500 dark:text-gray-400 text-xs">
+        {{ row.original.imageUrl || '–' }}
+      </span>
+    </div>
+  </template>
+
           <!-- Aktionen -->
-       
+       <template #actions-cell="{ row }">
+    <div class="flex gap-2">
+      <UButton
+        size="xs"
+        color="primary"
+        variant="soft"
+        icon="i-heroicons-pencil-square"
+        @click="onEdit(row.original)"
+      >
+        Bearbeiten
+      </UButton>
+
+      <UButton
+        size="xs"
+        color="primary"
+        variant="ghost"
+        icon="i-heroicons-trash"
+        @click="onDelete(row.original)"
+      >
+        Löschen
+      </UButton>
+    </div>
+  </template>
         </UTable>
       </UCard>
 
@@ -283,6 +363,32 @@ const onSubmit = () => {
     class="w-full"
   />
 </div>
+
+   <!-- Link -->
+        <div class="space-y-1">
+          <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+            Link (optional)
+          </label>
+          <UInput
+            v-model="form.link"
+            type="url"
+            placeholder="https://..."
+            class="w-full"
+          />
+        </div>
+
+        <!-- Bild-URL -->
+        <div class="space-y-1">
+          <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+            Bild-URL (optional)
+          </label>
+          <UInput
+            v-model="form.imageUrl"
+            type="url"
+            placeholder="https://... (Bild zum Geschenk)"
+            class="w-full"
+          />
+        </div>
 
               <!-- Notizen -->
               <div class="space-y-1">
