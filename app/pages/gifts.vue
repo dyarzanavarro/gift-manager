@@ -9,18 +9,27 @@ import { link } from '#build/ui';
 const { gifts, addGift, updateGift, deleteGift } = useGifts();
  
 const { people } = usePeople();
+const { occasions } = useOccasions()
+
 
 //show gift per person
 interface GiftRow extends GiftIdea {
   personName: string;
+  occasionName: string
 }
+
+const occasionItems = computed<SelectItem[]>(() =>
+  occasions.value.map(o => ({ label: o.name, value: o.id }))
+);
 
 const rows = computed<GiftRow[]>(() => {
   const list = gifts.value.map(g => {
     const person = people.value.find(p => p.id === g.personId)
+    const occ =  occasions.value.find(o => o.id === g.occasionId)
     return {
       ...g,
-      personName: person?.name ?? 'Unbekannt'
+      personName: person?.name ?? 'Unbekannt',
+      occasionName: occ?.name ?? 'Unbekannt'
     }
   })
 
@@ -28,7 +37,8 @@ const rows = computed<GiftRow[]>(() => {
   return list.sort((a, b) => {
     const nameCompare = a.personName.localeCompare(b.personName, 'de-CH')
     if (nameCompare !== 0) return nameCompare
-
+    const o = a.occasionName.localeCompare(b.occasionName, 'de-CH')
+    if (o !== 0) return o
     // if same person, sort by title
     return a.title.localeCompare(b.title, 'de-CH')
   })
@@ -58,7 +68,7 @@ const columns: TableColumn<GiftRow>[] = [
     header: 'Person'
     },
     {
-    accessorKey: 'occasion',
+    accessorKey: 'occasionName',
     header: 'Anlass'
     },
     {
@@ -88,7 +98,7 @@ type GiftForm = {
   title: string;
     personId: number | null;
     notes: string;
-    occasion: string;
+    occasionId: number | null;
     status: GiftStatus;
     link: string;
     imageUrl: string;
@@ -98,7 +108,7 @@ const form = reactive<GiftForm>({
   title: '',
     personId: null,
     notes: '',
-    occasion: '',
+    occasionId: null,
     status: 'idea',
     link: '',
     imageUrl: ''
@@ -110,7 +120,7 @@ const resetForm = () => {
     form.personId = null
     form.title = ''
     form.notes = ''
-    form.occasion = ''
+    form.occasionId = null
     form.status = 'idea'
     form.link = ''
     form.imageUrl = ''
@@ -128,7 +138,7 @@ const onEdit = (row: GiftRow) => {
     form.personId = row.personId
     form.title = row.title
     form.notes = row.notes ?? ''
-    form.occasion = row.occasion
+    form.occasionId = row.occasionId
     form.status = row.status
     form.link = row.link ?? ''
     form.imageUrl = row.imageUrl ?? ''
@@ -151,11 +161,15 @@ const onSubmit = () => {
     return
   }
 
+  if (!form.occasionId) return alert('Bitte einen Anlass auswählen.')
+
+
+
   const payload: Omit<GiftIdea, 'id'> = {
     personId: form.personId,
     title: form.title.trim(),
     notes: form.notes.trim() || undefined,
-    occasion: form.occasion.trim() || 'Allgemein',
+    occasionId: form.occasionId,
     status: form.status,
     link: form.link.trim() || undefined,
     imageUrl: form.imageUrl.trim() || undefined,
@@ -218,7 +232,7 @@ const onSubmit = () => {
           <!-- Anlass -->
           <template #occasion-cell="{ row }">
             <span class="text-gray-700 dark:text-gray-300">
-              {{ row.original.occasion || '–' }}
+              {{ row.original.occasionName || '–' }}
             </span>
           </template>
 
@@ -349,8 +363,8 @@ const onSubmit = () => {
                   Anlass
                 </label>
                 <UInput
-                  v-model="form.occasion"
-                  placeholder="z. B. Geburtstag, Weihnachten"
+                  v-model="form.occasionId"
+                  placeholder="Anlass auswählen"
                   class="w-full"
                 />
               </div>
