@@ -5,7 +5,7 @@ export interface GiftIdea {
     personId: number
     title: string
     notes?: string
-    occasion: string
+    occasionId: number
     status: GiftStatus
     link?: string
     imageUrl?: string
