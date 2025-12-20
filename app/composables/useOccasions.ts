@@ -10,10 +10,10 @@ export const useOccasions = () => {
     }
 
     const updateOccasion = (id: number, patch: Partial<Omit<Occasion, 'id'>>) => {
-        const idx = occasions.value.findIndex(x => x.id === id)
-        if (idx !== -1) occasions.value[idx] = { ...occasions.value[idx], ...patch }
+        occasions.value = occasions.value.map(o =>
+            o.id === id ? { ...o, ...patch } : o
+        )
     }
-
     const deleteOccasion = (id: number) => {
         occasions.value = occasions.value.filter(x => x.id !== id)
     }

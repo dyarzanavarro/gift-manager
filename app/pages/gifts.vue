@@ -2,12 +2,10 @@
 import type { TableColumn } from '@nuxt/ui';
 import type { GiftIdea, GiftStatus } from '~/models/gift';
 import type { SelectItem } from '@nuxt/ui'
-import { link } from '#build/ui';
 
 
 
 const { gifts, addGift, updateGift, deleteGift } = useGifts();
- 
 const { people } = usePeople();
 const { occasions } = useOccasions()
 
@@ -19,8 +17,11 @@ interface GiftRow extends GiftIdea {
 }
 
 const occasionItems = computed<SelectItem[]>(() =>
-  occasions.value.map(o => ({ label: o.name, value: o.id }))
-);
+  occasions.value.map(o => ({
+    label: o.name,
+    value: o.id
+  }))
+)
 
 const rows = computed<GiftRow[]>(() => {
   const list = gifts.value.map(g => {
@@ -108,7 +109,7 @@ const form = reactive<GiftForm>({
   title: '',
     personId: null,
     notes: '',
-    occasionId: null,
+    occasionId: null as number | null,
     status: 'idea',
     link: '',
     imageUrl: ''
@@ -183,6 +184,8 @@ const onSubmit = () => {
 
   isOpen.value = false
 }
+
+
 </script>
 
 
@@ -230,7 +233,7 @@ const onSubmit = () => {
           </template>
 
           <!-- Anlass -->
-          <template #occasion-cell="{ row }">
+          <template #occasionName-cell="{ row }">
             <span class="text-gray-700 dark:text-gray-300">
               {{ row.original.occasionName || '–' }}
             </span>
@@ -362,12 +365,15 @@ const onSubmit = () => {
                 <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
                   Anlass
                 </label>
-                <UInput
-                  v-model="form.occasionId"
-                  placeholder="Anlass auswählen"
-                  class="w-full"
-                />
-              </div>
+<USelect
+  v-model="form.occasionId"
+  :items="occasionItems"
+  value-attribute="value"
+  option-attribute="label"
+  placeholder="Anlass auswählen"
+  class="w-full"
+/>
+</div>
 
               <!-- Status -->
           <div class="space-y-1">
