@@ -94,8 +94,7 @@ const formatBirthday = (value?: string) => {
 
       <!-- PERSON TABLE -->
       <UCard
-             class="bg-white dark:bg-gray-900 shadow-sm">
->
+             class="bg-gray-900 shadow-sm">
         <template #header>
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -105,6 +104,7 @@ const formatBirthday = (value?: string) => {
               <UButton
                 icon="i-heroicons-plus"
                 color="primary"
+                class="font-bold"
                 variant="solid"
                 @click="onCreate"
               >
