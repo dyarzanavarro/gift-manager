@@ -3,7 +3,8 @@ import type { GiftStatus, GiftIdea } from '~/models/gift'
 import type { Person } from '~/models/person'
 
 const { people } = usePeople()
-
+const { gifts } = useGifts()
+const { occasions } = useOccasions()
 
 const today = () => {
   const d = new Date()
@@ -43,6 +44,54 @@ const nextBirthdays = computed(() => {
 
   return list
 })
+
+const occasionNameById = (id: number) =>
+  occasions.value.find(o => o.id === id)?.name ?? 'Unbekannt'
+
+type GiftRow = GiftIdea & { personName: string; occasionName: string }
+
+const openGifts = computed<GiftRow[]>(() => {
+  const list = gifts.value
+    .filter(g => g.status !== 'given')
+    .map(g => ({
+      ...g,
+      personName: people.value.find(p => p.id === g.personId)?.name ?? 'Unbekannt',
+      occasionName: occasionNameById(g.occasionId)
+    }))
+
+  // sort by occasion then person then status then title
+  const statusOrder: Record<GiftStatus, number> = { idea: 1, planned: 2, bought: 3, given: 4 }
+
+  return list.sort((a, b) => {
+    const o = a.occasionName.localeCompare(b.occasionName, 'de-CH')
+    if (o !== 0) return o
+    const p = a.personName.localeCompare(b.personName, 'de-CH')
+    if (p !== 0) return p
+    const s = statusOrder[a.status] - statusOrder[b.status]
+    if (s !== 0) return s
+    return a.title.localeCompare(b.title, 'de-CH')
+  })
+})
+
+const statusLabel = (s: GiftStatus) => {
+  switch (s) {
+    case 'idea': return 'Idee'
+    case 'planned': return 'Geplant'
+    case 'bought': return 'Gekauft'
+    case 'given': return 'Überreicht'
+    default: return s
+  }
+}
+
+const statusColor = (s: GiftStatus) => {
+  switch (s) {
+    case 'idea': return 'neutral'
+    case 'planned': return 'warning'
+    case 'bought': return 'success'
+    case 'given': return 'info'
+    default: return 'neutral'
+  }
+}
 
 </script>
 
@@ -102,6 +151,41 @@ const nextBirthdays = computed(() => {
             </p>
           </div>
         </UCard>
+
+          <!-- Open gifts -->
+        <UCard class="lg:col-span-2">
+          <template #header>
+            <div class="flex items-center justify-between">
+              <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                Offene Geschenkideen
+              </h2>
+              <UButton to="/gifts" size="xs" color="neutral" variant="ghost">
+                Verwalten
+              </UButton>
+            </div>
+          </template>
+
+          <div class="space-y-2">
+            <UCard v-for="g in openGifts.slice(0, 8)" :key="g.id" class="p-3">
+              <div class="flex items-start justify-between gap-3">
+                <div class="space-y-1">
+                  <div class="font-medium text-gray-900 dark:text-gray-100">{{ g.title }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ g.personName }} · {{ g.occasionName }}
+                  </div>
+                </div>
+
+                <UBadge size="xs" :color="statusColor(g.status)" variant="soft">
+                  {{ statusLabel(g.status) }}
+                </UBadge>
+              </div>
+            </UCard>
+            <p v-if="openGifts.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
+              Keine offenen Geschenkideen.
+            </p>  
+            </div>
+        </UCard>
+
       </div>
     
  </UContainer>
