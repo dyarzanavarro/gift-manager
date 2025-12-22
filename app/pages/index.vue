@@ -93,6 +93,7 @@ const statusColor = (s: GiftStatus) => {
   }
 }
 
+
 </script>
 
 
@@ -100,7 +101,7 @@ const statusColor = (s: GiftStatus) => {
  <UPage>
     <UPageHeader
       title="Dashboard"
-      description="Überblick über anstehende Geburtstage, offene Geschenkideen und den Weihnachtsstatus."
+      description="Überblick über anstehende Geburtstage & offene Geschenkideen."
       class="text-gray-900 dark:text-gray-100"
     />
  <UContainer class="space-y-6">
@@ -152,7 +153,7 @@ const statusColor = (s: GiftStatus) => {
           </div>
         </UCard>
 
-          <!-- Open gifts -->
+               <!-- Open gifts -->
         <UCard class="lg:col-span-2">
           <template #header>
             <div class="flex items-center justify-between">
@@ -180,14 +181,21 @@ const statusColor = (s: GiftStatus) => {
                 </UBadge>
               </div>
             </UCard>
+
             <p v-if="openGifts.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
               Keine offenen Geschenkideen.
-            </p>  
-            </div>
-        </UCard>
+            </p>
 
+            <div v-if="openGifts.length > 8" class="pt-2">
+              <UButton to="/gifts" color="primary" variant="soft" size="sm">
+                Alle offenen Geschenkideen anzeigen ({{ openGifts.length }})
+              </UButton>
+            </div>
+          </div>
+        </UCard>
       </div>
-    
- </UContainer>
+
+    </UContainer>
   </UPage>
+
 </template>

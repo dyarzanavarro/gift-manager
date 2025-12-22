@@ -1,29 +1,174 @@
+<script setup lang="ts">
+import { useRoute } from 'vue-router'
+
+
+const route = useRoute()
+const isMobileNavOpen = ref(false)
+
+const navItems = [
+  { label: 'Personen', to: '/people/people' },
+  { label: 'Geschenkideen', to: '/gifts' }
+]
+
+const isActive = (path: string) =>
+  route.path === path || route.path.startsWith(path + '/')
+
+
+const { people } = usePeople()
+
+const today = () => {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+const daysFromToday = (iso?: string | null) => {
+  if (!iso) return Number.POSITIVE_INFINITY
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return Number.POSITIVE_INFINITY
+
+  const t = today()
+  d.setFullYear(t.getFullYear())
+  d.setHours(0, 0, 0, 0)
+
+  if (d < t) d.setFullYear(t.getFullYear() + 1)
+
+  const diffMs = d.getTime() - t.getTime()
+  return Math.round(diffMs / (1000 * 60 * 60 * 24))
+}
+
+const birthdaysThisWeek = computed(() => {
+  return people.value
+    .filter(p => !!p.birthday)
+    .map(p => ({ ...p, inDays: daysFromToday(p.birthday) }))
+    .filter(p => p.inDays <= 7)
+    .sort((a, b) => a.inDays - b.inDays)
+})
+
+const birthdayBannerText = computed(() => {
+  const n = birthdaysThisWeek.value.length
+  if (n === 0) return ''
+  if (n === 1) return '1 Geburtstag in den nächsten 7 Tagen'
+  return `${n} Geburtstage in den nächsten 7 Tagen`
+})
+
+const isBirthdayBannerDismissed = useState<boolean>(
+  'birthday_banner_dismissed',
+  () => false
+)
+
+const showBirthdayBanner = computed(
+  () => birthdaysThisWeek.value.length > 0 && !isBirthdayBannerDismissed.value
+)
+</script>
+
 <template>
   <div class="min-h-screen bg-slate-950 text-slate-100">
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur">
+    <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur">
       <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-<!-- img here-->         
-<nuxt-link class="font-medium text-sm" to="/">Geschenke-Manager</nuxt-link>  
+        <!-- Logo / Title -->
+        <div class="flex items-center gap-3">
+         <nuxt-link to="/" class="flex items-center gap-2">
+         
+            <span class="text-lg font-semibold text-white">
+              Geschenke-Manager
+            </span>
+          </nuxt-link>
         </div>
 
-        <nuxt-link
-          to="/gifts"
-          class="text-sm font-medium text-slate-300 hover:text-slate-100"
-          >Geschenkideen</nuxt-link>
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center gap-1">
+          <NuxtLink
+            v-for="item in navItems"
+            :key="item.to"
+            :to="item.to"
+            class="px-3 py-1.5 text-sm rounded-lg transition"
+            :class="isActive(item.to)
+              ? 'bg-slate-800 text-white'
+              : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+          >
+            {{ item.label }}
+          </NuxtLink>
+        </div>
 
-          <nuxt-link
-          to="/people/people"
-          class="text-sm font-medium text-slate-300 hover:text-slate-100"
-          >Personen</nuxt-link>
-
-        <input
-          type="text"
-          placeholder="Suchen..."
-          class="hidden md:block bg-slate-800 text-sm rounded-xl px-3 py-1.5"
+        <!-- Mobile Menu Button -->
+        <UButton
+          class="md:hidden"
+          icon="i-heroicons-bars-3"
+          variant="ghost"
+          color="neutral"
+          @click="isMobileNavOpen = !isMobileNavOpen"
         />
       </nav>
+
+      <!-- Mobile Navigation -->
+      <div
+        v-if="isMobileNavOpen"
+        class="md:hidden border-t border-slate-800 bg-slate-900"
+      >
+        <div class="px-4 py-2 flex flex-col gap-1">
+          <NuxtLink
+            v-for="item in navItems"
+            :key="item.to"
+            :to="item.to"
+            class="px-3 py-2 rounded-lg text-sm"
+            :class="isActive(item.to)
+              ? 'bg-slate-800 text-white'
+              : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+            @click="isMobileNavOpen = false"
+          >
+            {{ item.label }}
+          </NuxtLink>
+        </div>
+      </div>
     </header>
+
+    <div v-if="showBirthdayBanner" class="max-w-6xl mx-auto px-4 pt-4">
+      <UAlert
+        color="primary"
+        variant="soft"
+        icon="i-heroicons-cake"
+      >
+        <template #title>
+          {{ birthdayBannerText }}
+        </template>
+
+        <template #description>
+          <span class="text-sm">
+            {{
+              birthdaysThisWeek
+                .slice(0, 3)
+                .map(p => p.name)
+                .join(', ')
+            }}
+            <span v-if="birthdaysThisWeek.length > 3">
+              +{{ birthdaysThisWeek.length - 3 }} weitere
+            </span>
+          </span>
+        </template>
+
+        <template #actions>
+          <div class="flex gap-2">
+            <UButton
+              to="/people/people"
+              size="xs"
+              color="primary"
+              variant="solid"
+            >
+              Ansehen
+            </UButton>
+            <UButton
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              @click="isBirthdayBannerDismissed = true"
+            >
+              Ausblenden
+            </UButton>
+          </div>
+        </template>
+      </UAlert>
+    </div>
 
     <main class="max-w-6xl mx-auto px-4 py-6">
       <slot />
