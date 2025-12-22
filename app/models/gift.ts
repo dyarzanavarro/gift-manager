@@ -1,4 +1,4 @@
-export type GiftStatus = 'idea' | 'planned' | 'bought'
+export type GiftStatus = 'idea' | 'planned' | 'bought' | 'given';
 
 export interface GiftIdea {
     id: number
