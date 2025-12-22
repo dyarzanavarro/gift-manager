@@ -60,6 +60,12 @@ const isBirthdayBannerDismissed = useState<boolean>(
 const showBirthdayBanner = computed(
   () => birthdaysThisWeek.value.length > 0 && !isBirthdayBannerDismissed.value
 )
+
+const client = useSupabaseClient()
+const signOut = async () => {
+  await client.auth.signOut()
+  navigateTo('/login')
+}
 </script>
 
 <template>
@@ -89,6 +95,7 @@ const showBirthdayBanner = computed(
           >
             {{ item.label }}
           </NuxtLink>
+          <UButton @click="signOut">Abmelden</UButton>
         </div>
 
         <!-- Mobile Menu Button -->

@@ -6,6 +6,10 @@ const { people } = usePeople()
 const { gifts } = useGifts()
 const { occasions } = useOccasions()
 
+definePageMeta({
+  middleware: ['auth']
+})
+
 const today = () => {
   const d = new Date()
   d.setHours(0, 0, 0, 0)
