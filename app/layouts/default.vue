@@ -13,7 +13,7 @@
           >Geschenkideen</nuxt-link>
 
           <nuxt-link
-          to="/people"
+          to="/people/people"
           class="text-sm font-medium text-slate-300 hover:text-slate-100"
           >Personen</nuxt-link>
 

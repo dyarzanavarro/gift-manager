@@ -115,6 +115,16 @@ const formatBirthday = (value?: string) => {
         </template>
 
         <UTable :data="people" :columns="columns">
+          <template #name-cell="{ row }">
+  <UButton
+    :to="`/people/${row.original.id}`"
+    variant="ghost"
+    color="primary"
+    class="p-0 font-medium"
+  >
+    {{ row.original.name }}
+  </UButton>
+</template>
           <!-- Geburtstag -->
           <template #birthday-cell="{ row }">
             <span v-if="row.original.birthday">
