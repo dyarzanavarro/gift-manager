@@ -2,15 +2,20 @@
 import type { Person } from '~/models/person'
 import type { GiftIdea, GiftStatus } from '~/models/gift'
 
-const route = useRoute()
+definePageMeta({ middleware: ['auth'] })
 
+const route = useRoute()
 const personId = computed(() => Number(route.params.id))
 
-const { people } = usePeople()
-const { gifts, deleteGift } = useGifts()
+const { people, fetchPeople, loading, error } = usePeople()
 const { occasions } = useOccasions()
-const { addGift } = useGifts()
 const isGiftModalOpen = ref(false)
+
+
+const { gifts, deleteGift, addGift, fetchGifts, loading: giftsLoading, error: giftsError } = useGifts()
+onMounted(() => {
+  if (!gifts.value.length) fetchGifts()
+})
 
 const person = computed<Person | undefined>(() =>
   people.value.find(p => p.id === personId.value)
@@ -39,8 +44,9 @@ const groupedCurrent = computed(() => ({
   bought: currentGifts.value.filter(g => g.status === 'bought')
 }))
 
-const onDeleteGift = (g: GiftIdea) => {
-  if (confirm(`"${g.title}" wirklich löschen?`)) deleteGift(g.id)
+const onDeleteGift = async (g: GiftIdea) => {
+  if (!confirm(`"${g.title}" wirklich loeschen?`)) return
+  try { await deleteGift(g.id) } catch (err: any) { alert(err.message ?? 'Loeschen fehlgeschlagen.') }
 }
 
 const formatDateCH = (iso?: string | null) => {
@@ -108,22 +114,22 @@ const openGiftModal = () => {
   isGiftModalOpen.value = true
 }
 
-const submitGiftForPerson = () => {
-  if (!person.value) return
-  if (!giftForm.title.trim()) return alert('Bitte einen Titel angeben.')
-  if (!giftForm.occasionId) return alert('Bitte einen Anlass auswählen.')
-
-  addGift({
-    personId: person.value.id,
-    occasionId: giftForm.occasionId,
-    title: giftForm.title.trim(),
-    status: giftForm.status,
-    notes: giftForm.notes.trim() || undefined,
-    link: giftForm.link.trim() || undefined,
-    imageUrl: giftForm.imageUrl.trim() || undefined
-  })
-
-  isGiftModalOpen.value = false
+const submitGiftForPerson = async () => {
+  // validation...
+  try {
+    await addGift({
+      personId: person.value.id,
+      occasionId: giftForm.occasionId!,
+      title: giftForm.title.trim(),
+      status: giftForm.status,
+      notes: giftForm.notes.trim() || undefined,
+      link: giftForm.link.trim() || undefined,
+      imageUrl: giftForm.imageUrl.trim() || undefined
+    })
+    isGiftModalOpen.value = false
+  } catch (err: any) {
+    alert(err.message ?? 'Speichern fehlgeschlagen.')
+  }
 }
 
 </script>
@@ -137,7 +143,13 @@ const submitGiftForPerson = () => {
     />
 
     <UContainer class="space-y-6">
-      <UCard v-if="!person">
+     <UAlert v-if="error" color="error" variant="soft" icon="i-heroicons-exclamation-circle">
+      {{ error }}
+    </UAlert>
+        <UCard v-if="loading">
+      <p class="text-sm text-gray-600 dark:text-gray-300">Lade Personendaten…</p>
+    </UCard>
+      <UCard v-else-if="!person">
         <p class="text-sm text-gray-600 dark:text-gray-300">
           Diese Person existiert nicht (mehr) oder die ID ist ungültig.
         </p>
@@ -237,7 +249,7 @@ const submitGiftForPerson = () => {
       </template>
       <UModal v-model:open="isGiftModalOpen" :ui="{ width: 'sm:max-w-xl' }">
   <template #content>
-    <UCard class="w-full max-w-xl mx-auto space-y-4">
+     <UCard class="w-full max-w-xl mx-auto space-y-4">
       <template #header>
         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
           Neue Geschenkidee für {{ person?.name }}

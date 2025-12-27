@@ -3,6 +3,8 @@ import type { Person } from '~/models/person';
 import { usePeople } from '~/composables/usePeople';
 import type { TableColumn } from '@nuxt/ui'
 
+definePageMeta({ middleware: ['auth'] })
+
 const columns: TableColumn<Person>[] = [
   {
     accessorKey: 'name',
@@ -21,19 +23,21 @@ const columns: TableColumn<Person>[] = [
     header: 'Aktionen'
   }
 ]
-const { people, addPerson, updatePerson, deletePerson } = usePeople();
+const { people, loading, error, fetchPeople, addPerson, updatePerson, deletePerson } = usePeople()
 
-// Modal state
-const isOpen = ref(false);
-const isEditing = ref(false);
-const editedId = ref<number | null>(null);
+const isOpen = ref(false)
+const isEditing = ref(false)
+const editedId = ref<number | null>(null)
 
-// Form state
-const form = reactive<Omit<Person, "id">>({
-  name: "",
-  birthday: "",
-  notes: ""
-});
+const form = reactive<Omit<Person, 'id'>>({
+  name: '',
+  birthday: '',
+  notes: ''
+})
+
+onMounted(() => {
+  fetchPeople()
+})
 
 const resetForm = () => {
   isEditing.value = false;
@@ -58,21 +62,27 @@ const onEdit = (person: Person) => {
   isOpen.value = true;
 };
 
-const onSubmit = () => {
-  if (isEditing.value && editedId.value !== null) {
-    updatePerson(editedId.value, { ...form });
-  } else {
-    addPerson({ ...form });
+const onSubmit = async () => {
+  try {
+    if (isEditing.value && editedId.value !== null) {
+      await updatePerson(editedId.value, { ...form })
+    } else {
+      await addPerson({ ...form })
+    }
+    isOpen.value = false
+  } catch (err: any) {
+    alert(err.message ?? 'Speichern fehlgeschlagen.')
   }
-  isOpen.value = false;
-};
+}
 
-const onDelete = (p: Person) => {
-  if (confirm(`Person "${p.name}" wirklich löschen?`)) {
-    deletePerson(p.id);
+const onDelete = async (p: Person) => {
+  if (!confirm(`Person "${p.name}" wirklich löschen?`)) return
+  try {
+    await deletePerson(p.id)
+  } catch (err: any) {
+    alert(err.message ?? 'Löschen fehlgeschlagen.')
   }
-};
-
+}
 
 const formatBirthday = (value?: string) => {
   if (!value) return '–';
@@ -85,12 +95,12 @@ const formatBirthday = (value?: string) => {
 
 <template>
   <UPage>
-    <UPageHeader
-      title="Personenverwaltung"
-      description="Verwalte Personen, Geburtstage und Notizen."
-    />
-
+     <UPageHeader title="Personenverwaltung" description="Verwalte Personen, Geburtstage und Notizen." />
     <UContainer class="space-y-6">
+      <UAlert v-if="error" color="error" variant="soft" icon="i-heroicons-exclamation-circle">
+        {{ error }}
+      </UAlert>
+
 
       <!-- PERSON TABLE -->
       <UCard
@@ -114,7 +124,9 @@ const formatBirthday = (value?: string) => {
           </div>
         </template>
 
-        <UTable :data="people" :columns="columns">
+                <div v-if="loading" class="p-3 text-sm text-gray-500">Lade Personen…</div>
+
+        <UTable v-else :data="people" :columns="columns">
           <template #name-cell="{ row }">
   <UButton
     :to="`/people/${row.original.id}`"
