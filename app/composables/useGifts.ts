@@ -1,10 +1,13 @@
 import type { GiftIdea, GiftStatus } from '~/models/gift'
-import { watch } from 'vue'
+import { watch, onMounted } from 'vue'
+
+import type { User } from '@supabase/supabase-js'
+import type { Ref } from 'vue'
 
 
 export const useGifts = () => {
     const client = useSupabaseClient()
-    const user = useSupabaseUser()
+    const user = useSupabaseUser() as Ref<User | null>
 
     const gifts = useState<GiftIdea[]>('gifts', () => [])
     const loading = useState<boolean>('gifts_loading', () => false)
@@ -23,9 +26,38 @@ export const useGifts = () => {
         createdAt: row.created_at
     })
 
+    const ensureUser = async () => {
+        const { data, error } = await client.auth.getSession()
+        if (error) {
+            console.error('getSession error', error.message)
+            return null
+        }
+        user.value = data.session?.user ?? null
+        return user.value
+    }
+
+    let authSub: { unsubscribe: () => void } | null = null
+
+    onMounted(async () => {
+        await ensureUser()
+        const { data } = client.auth.onAuthStateChange((_event, session) => {
+            user.value = session?.user ?? null
+            if (user.value?.id) fetchGifts() // use fetchPeople in the other composable
+            else gifts.value = []            // or people.value = []
+        })
+        authSub = data.subscription
+    })
+
+    onBeforeUnmount(() => {
+        authSub?.unsubscribe()
+    })
+
+    console.log('FGifts supabase user', user.value?.id)
+
 
     const fetchGifts = async () => {
-        const uid = user.value?.id
+        const u = await ensureUser()
+        const uid = u?.id
         if (!uid) {
             gifts.value = []
             return
@@ -100,6 +132,8 @@ export const useGifts = () => {
         },
         { immediate: true }
     )
+
+
 
     return { gifts, loading, error, fetchGifts, addGift, updateGift, deleteGift, getGiftsByPerson, setStatus }
 }

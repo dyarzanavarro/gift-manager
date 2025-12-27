@@ -1,12 +1,14 @@
 import type { Person } from '~/models/person'
 
-import { watch } from 'vue'
+import { watch, onMounted } from 'vue'
+import type { User } from '@supabase/supabase-js'
+import type { Ref } from 'vue'
 
 
 
 export const usePeople = () => {
     const client = useSupabaseClient()
-    const user = useSupabaseUser()
+    const user = useSupabaseUser() as Ref<User | null>
 
     const people = useState<Person[]>('people', () => [])
     const loading = useState<boolean>('people_loading', () => false)
@@ -21,9 +23,38 @@ export const usePeople = () => {
         createdAt: row.created_at
     })
 
+    const ensureUser = async () => {
+        const { data, error } = await client.auth.getSession()
+        if (error) {
+            console.error('getSession error', error.message)
+            return null
+        }
+        user.value = data.session?.user ?? null
+        return user.value
+    }
+
+    let authSub: { unsubscribe: () => void } | null = null
+
+    onMounted(async () => {
+        await ensureUser()
+        const { data } = client.auth.onAuthStateChange((_event, session) => {
+            user.value = session?.user ?? null
+            if (user.value?.id) fetchPeople() // use fetchPeople in the other composable
+            else people.value = []            // or people.value = []
+        })
+        authSub = data.subscription
+    })
+
+    onBeforeUnmount(() => {
+        authSub?.unsubscribe()
+    })
+
+    console.log('People supabase user', user.value?.id)
+
 
     const fetchPeople = async () => {
-        const uid = user.value?.id
+        const u = await ensureUser()
+        const uid = u?.id
         if (!uid) {
             people.value = []
             return
