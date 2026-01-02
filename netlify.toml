@@ -1,6 +1,6 @@
 [build]
-  command = "pnpm run build && echo 'PWD:' && pwd && echo 'ROOT .output:' && ls -la .output || true && echo 'APP .output:' && ls -la app/.output || true"
-  publish = ".output/public"
+  command = "pnpm run build"
+  publish = "dist"
 
 [functions]
   directory = ".netlify/functions-internal"
