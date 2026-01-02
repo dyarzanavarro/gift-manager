@@ -1,4 +1,3 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxtjs/supabase'],
 
@@ -9,7 +8,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   routeRules: {
-    '/': { prerender: true }
+    '/': { prerender: false }
   },
 
   compatibilityDate: '2025-01-15',
@@ -27,7 +26,7 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: '/login',
       callback: '/confirm',
-      exclude: ['/', '/login', '/confirm']
+      exclude: ['/login', '/confirm']
     }
   }
 
