@@ -26,6 +26,18 @@ export const useGifts = () => {
         createdAt: row.created_at
     })
 
+    type GiftUpsertPayload = Omit<GiftIdea, 'id' | 'userId' | 'createdAt'>
+
+    const toDb = (p: GiftUpsertPayload) => ({
+        person_id: p.personId,
+        occasion_id: p.occasionId,
+        title: p.title,
+        notes: p.notes ?? null,
+        status: p.status,
+        link: p.link ?? null,
+        image_url: p.imageUrl ?? null
+    })
+
     const ensureUser = async () => {
         const { data, error } = await client.auth.getSession()
         if (error) {
@@ -80,28 +92,37 @@ export const useGifts = () => {
     }
 
 
-    const addGift = async (payload: Omit<GiftIdea, 'id' | 'userId' | 'createdAt'>) => {
+    const addGift = async (payload: GiftUpsertPayload) => {
         if (!user.value) throw new Error('Not authenticated')
+
         const { data, error: err } = await client
             .from('gifts')
-            .insert([{ ...payload, user_id: user.value.id }])
+            .insert([{ ...toDb(payload), user_id: user.value.id }])
             .select('id, user_id, person_id, occasion_id, title, notes, status, link, image_url, created_at')
             .single()
+
         if (err) throw err
         gifts.value.unshift(mapRow(data))
     }
 
-    const updateGift = async (id: number, payload: Omit<GiftIdea, 'id' | 'userId' | 'createdAt'>) => {
+    const updateGift = async (id: number, payload: GiftUpsertPayload) => {
         if (!user.value) throw new Error('Not authenticated')
+
         const { data, error: err } = await client
             .from('gifts')
-            .update({ ...payload })
+            .update(toDb(payload))
             .eq('id', id)
             .eq('user_id', user.value.id)
             .select('id, user_id, person_id, occasion_id, title, notes, status, link, image_url, created_at')
             .single()
+
         if (err) throw err
         gifts.value = gifts.value.map(g => (g.id === id ? mapRow(data) : g))
+    }
+    const reset = () => {
+        gifts.value = []
+        loading.value = false
+        error.value = null
     }
 
     const deleteGift = async (id: number) => {
@@ -121,9 +142,17 @@ export const useGifts = () => {
     const setStatus = async (id: number, status: GiftStatus) => {
         const gift = gifts.value.find(g => g.id === id)
         if (!gift) return
-        await updateGift(id, { ...gift, status })
-    }
 
+        await updateGift(id, {
+            personId: gift.personId,
+            occasionId: gift.occasionId,
+            title: gift.title,
+            notes: gift.notes,
+            status,
+            link: gift.link,
+            imageUrl: gift.imageUrl
+        })
+    }
     watch(
         () => user.value?.id,
         uid => {
@@ -135,5 +164,5 @@ export const useGifts = () => {
 
 
 
-    return { gifts, loading, error, fetchGifts, addGift, updateGift, deleteGift, getGiftsByPerson, setStatus }
+    return { gifts, loading, error, reset, fetchGifts, addGift, updateGift, deleteGift, getGiftsByPerson, setStatus }
 }

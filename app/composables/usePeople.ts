@@ -112,6 +112,12 @@ export const usePeople = () => {
         people.value = people.value.filter(p => p.id !== id)
     }
 
+    const reset = () => {
+        people.value = []
+        loading.value = false
+        error.value = null
+    }
+
     const getPersonById = (id: number) => people.value.find(p => p.id === id)
 
     watch(
@@ -127,6 +133,7 @@ export const usePeople = () => {
         people,
         loading,
         error,
+        reset,
         fetchPeople,
         addPerson,
         updatePerson,

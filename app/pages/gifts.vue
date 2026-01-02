@@ -74,7 +74,7 @@ const editedId = ref<number | null>(null)
 
 type GiftForm = {
   title: string
-  personId: number | null
+  personId: string | null
   notes: string
   occasionId: number | null
   status: GiftStatus
@@ -138,7 +138,7 @@ const onSubmit = async () => {
   if (!form.occasionId) return alert('Bitte einen Anlass auswählen.')
 
   const payload: Omit<GiftIdea, 'id'> = {
-    personId: form.personId,
+    personId: Number(form.personId),
     title: form.title.trim(),
     notes: form.notes.trim() || undefined,
     occasionId: form.occasionId,
@@ -178,7 +178,7 @@ const onSubmit = async () => {
         {{ error }}
       </UAlert>
 
-      <UCard class="dark:bg-gray-900 shadow-sm">
+      <UCard class="bg-white dark:bg-gray-900 shadow-sm">
         <template #header>
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">

@@ -6,7 +6,7 @@ const route = useRoute()
 const isMobileNavOpen = ref(false)
 
 const navItems = [
-  { label: 'Personen', to: '/people/people' },
+  { label: 'Personen', to: '/people' },
   { label: 'Geschenkideen', to: '/gifts' }
 ]
 
@@ -157,7 +157,7 @@ const signOut = async () => {
         <template #actions>
           <div class="flex gap-2">
             <UButton
-              to="/people/people"
+              to="/people"
               size="xs"
               color="primary"
               variant="solid"

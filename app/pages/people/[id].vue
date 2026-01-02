@@ -5,25 +5,27 @@ import type { GiftIdea, GiftStatus } from '~/models/gift'
 definePageMeta({ middleware: ['auth'] })
 
 const route = useRoute()
-const personId = computed(() => Number(route.params.id))
+const personId = computed(() => String(route.params.id))
 
 const { people, fetchPeople, loading, error } = usePeople()
 const { occasions } = useOccasions()
 const isGiftModalOpen = ref(false)
+const ready = ref(false)
 
 
 const { gifts, deleteGift, addGift, fetchGifts, loading: giftsLoading, error: giftsError } = useGifts()
-onMounted(() => {
-  if (!gifts.value.length) fetchGifts()
+onMounted(async () => {
+  if (!people.value.length) await fetchPeople()
+  if (!gifts.value.length) await fetchGifts()
+  ready.value = true
 })
-
 const person = computed<Person | undefined>(() =>
-  people.value.find(p => p.id === personId.value)
+  people.value.find(p => String(p.id) === personId.value)
 )
 
 const personGifts = computed(() =>
   gifts.value
-    .filter(g => g.personId === personId.value)
+    .filter(g => String(g.personId) === personId.value)
     .map(g => ({
       ...g,
       occasionName: occasions.value.find(o => o.id === g.occasionId)?.name ?? 'Unbekannt'
@@ -48,6 +50,11 @@ const onDeleteGift = async (g: GiftIdea) => {
   if (!confirm(`"${g.title}" wirklich loeschen?`)) return
   try { await deleteGift(g.id) } catch (err: any) { alert(err.message ?? 'Loeschen fehlgeschlagen.') }
 }
+
+watchEffect(() => {
+  console.log('route id', personId.value)
+  console.log('first person id', people.value?.[0]?.id)
+})
 
 const formatDateCH = (iso?: string | null) => {
   if (!iso) return '–'
@@ -137,7 +144,7 @@ const submitGiftForPerson = async () => {
 <template>
   <UPage>
     <UPageHeader
-      :title="person ? person.name : 'Person nicht gefunden'"
+      :title="person ? person.name : 'Person ladet'"
       :description="person?.birthday ? `Geburtstag: ${ formatDateCH(person.birthday) }` : 'Kein Geburtstag gespeichert'"
       :headline="person?.notes ? `Notizen: ${person.notes}` : 'Keine Notizen gespeichert'"
     />
@@ -146,15 +153,16 @@ const submitGiftForPerson = async () => {
      <UAlert v-if="error" color="error" variant="soft" icon="i-heroicons-exclamation-circle">
       {{ error }}
     </UAlert>
-        <UCard v-if="loading">
-      <p class="text-sm text-gray-600 dark:text-gray-300">Lade Personendaten…</p>
-    </UCard>
-      <UCard v-else-if="!person">
-        <p class="text-sm text-gray-600 dark:text-gray-300">
-          Diese Person existiert nicht (mehr) oder die ID ist ungültig.
-        </p>
-        <UButton to="/people" class="mt-3" color="primary" variant="soft">Zurück</UButton>
-      </UCard>
+  <UCard v-if="!ready || loading">
+  <p class="text-sm text-gray-600 dark:text-gray-300">Lade Personendaten…</p>
+</UCard>
+
+<UCard v-else-if="!person">
+  <p class="text-sm text-gray-600 dark:text-gray-300">
+    Diese Person existiert nicht (mehr) oder die ID ist ungültig.
+  </p>
+  <UButton to="/people" class="mt-3" color="primary" variant="soft">Zurück</UButton>
+</UCard>
 
       <template v-else>
         <!-- Quick Actions -->
@@ -167,7 +175,7 @@ const submitGiftForPerson = async () => {
             Geschenkidee hinzufügen
           </UButton>
 
-          <UButton to="/people/people" color="neutral" variant="soft">
+          <UButton to="/people" color="neutral" variant="soft">
             Zur Personenliste
           </UButton>
         </div>
