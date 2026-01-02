@@ -69,7 +69,7 @@ const signOut = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100">
+  <div class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
     <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur">
       <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <!-- Logo / Title -->
