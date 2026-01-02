@@ -163,7 +163,7 @@ const onSubmit = async () => {
 </script>
 
 <template>
-  <UPage>
+  <UPage class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
     <UPageHeader
       title="Geschenkideen"
       class="text-gray-900 dark:text-gray-100"
@@ -180,7 +180,7 @@ const onSubmit = async () => {
         {{ error }}
       </UAlert>
 
-      <UCard class="bg-white dark:bg-gray-900 shadow-sm">
+      <UCard class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
         <template #header>
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">

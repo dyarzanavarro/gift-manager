@@ -94,7 +94,7 @@ const formatBirthday = (value?: string) => {
 </script>
 
 <template>
-  <UPage>
+  <UPage class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
      <UPageHeader title="Personenverwaltung" description="Verwalte Personen, Geburtstage und Notizen." />
     <UContainer class="space-y-6">
       <UAlert v-if="error" color="error" variant="soft" icon="i-heroicons-exclamation-circle">
@@ -104,7 +104,7 @@ const formatBirthday = (value?: string) => {
 
       <!-- PERSON TABLE -->
       <UCard
-             class="bg-white dark:bg-gray-900 shadow-sm">
+             class="bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 shadow-sm">
         <template #header>
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">

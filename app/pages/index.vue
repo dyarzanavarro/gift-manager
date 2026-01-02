@@ -96,17 +96,15 @@ const statusColor = (s: GiftStatus) => {
     default: return 'neutral'
   }
 }
-
-
 </script>
 
 
 <template>
- <UPage>
+ <UPage class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
     <UPageHeader
       title="Dashboard"
       description="Überblick über anstehende Geburtstage & offene Geschenkideen."
-      class="text-gray-900 dark:text-gray-100"
+      class="bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100"
     />
  <UContainer class="space-y-6">
     <!-- UPCOMING BIRTHDAYS -->
@@ -116,7 +114,7 @@ const statusColor = (s: GiftStatus) => {
         <UCard class="lg:col-span-1">
           <template #header>
             <div class="flex items-center justify-between">
-              <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+              <h2 class="text-xl font-medium text-gray-900 dark:text-gray-100">
                 Nächste Geburtstage
               </h2>
               <UButton to="/people" size="xs" color="neutral" variant="ghost">
@@ -137,15 +135,15 @@ const statusColor = (s: GiftStatus) => {
                     :to="`/people/${p.id}`"
                     variant="ghost"
                     color="primary"
-                    class="p-0 font-medium"
+                    class="p-0 font-medium text-2xl"
                   >
                     {{ p.name }}
                   </UButton>
-                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                  <div class="text-xs text-gray-500 dark:text-gray-400 text-lg">
                     {{ p.dateCH }} · in {{ p.inDays }} Tagen
                   </div>
                 </div>
-                <UBadge size="xs" color="neutral" variant="soft">
+                <UBadge size="xl" color="neutral" variant="soft">
                   🎂
                 </UBadge>
               </div>
@@ -161,7 +159,7 @@ const statusColor = (s: GiftStatus) => {
         <UCard class="lg:col-span-2">
           <template #header>
             <div class="flex items-center justify-between">
-              <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+              <h2 class="text-xl font-medium text-gray-900 dark:text-gray-100">
                 Offene Geschenkideen
               </h2>
               <UButton to="/gifts" size="xs" color="neutral" variant="ghost">
@@ -174,13 +172,13 @@ const statusColor = (s: GiftStatus) => {
             <UCard v-for="g in openGifts.slice(0, 8)" :key="g.id" class="p-3">
               <div class="flex items-start justify-between gap-3">
                 <div class="space-y-1">
-                  <div class="font-medium text-gray-900 dark:text-gray-100">{{ g.title }}</div>
+                  <div class="font-medium text-gray-900 dark:text-gray-100 text-lg">{{ g.title }}</div>
                   <div class="text-xs text-gray-500 dark:text-gray-400">
                     {{ g.personName }} · {{ g.occasionName }}
                   </div>
                 </div>
 
-                <UBadge size="xs" :color="statusColor(g.status)" variant="soft">
+                <UBadge size="xl" :color="statusColor(g.status)" variant="soft">
                   {{ statusLabel(g.status) }}
                 </UBadge>
               </div>

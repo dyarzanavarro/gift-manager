@@ -162,8 +162,14 @@ const submitGiftForPerson = async () => {
 </UCard>
 
       <template v-else>
-        <!-- Quick Actions -->
-        <div class="flex flex-wrap gap-2 justify-end">
+             <!-- Aktuelle Geschenkideen -->
+        <UCard>
+          <template #header>
+            <div class="flex items-center justify-between">
+            <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+              Aktuelle Geschenkideen
+            </h2>
+            <div class="flex justify-end">
           <UButton
               @click="openGiftModal"
             color="primary"
@@ -175,12 +181,8 @@ const submitGiftForPerson = async () => {
           <UButton to="/people" color="neutral" variant="soft">
             Zur Personenliste
           </UButton>
+          </div>
         </div>
-
-        <!-- Aktuelle Geschenkideen -->
-        <UCard>
-          <template #header>
-            <h2 class="text-sm font-medium">Aktuelle Geschenkideen</h2>
           </template>
 
           <div class="grid gap-6 md:grid-cols-3">
