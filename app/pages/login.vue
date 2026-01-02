@@ -48,10 +48,10 @@ const signUp = async () => {
         <UInput v-model="password" type="password" placeholder="Passwort" />
 
         <div class="flex gap-2">
-          <UButton :loading="loading" color="primary" class="flex-1" @click="signIn">
+          <UButton type="button" :loading="loading" color="primary" class="flex-1" @click="signIn">
             Einloggen
           </UButton>
-          <UButton :loading="loading" color="neutral" variant="soft" class="flex-1" @click="signUp">
+          <UButton type="button" :loading="loading" color="neutral" variant="soft" class="flex-1" @click="signUp">
             Registrieren
           </UButton>
         </div>

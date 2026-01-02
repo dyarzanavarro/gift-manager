@@ -16,3 +16,15 @@
   --color-green-900: #0A5331;
   --color-green-950: #052E16;
 }
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+/*
+Make sure disabled buttons don't get the pointer cursor.
+*/
+:disabled {
+  cursor: default;
+}

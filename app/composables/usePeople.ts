@@ -1,6 +1,6 @@
 import type { Person } from '~/models/person'
 
-import { watch, onMounted } from 'vue'
+import { watch, onMounted, onBeforeUnmount } from 'vue'
 import type { User } from '@supabase/supabase-js'
 import type { Ref } from 'vue'
 
