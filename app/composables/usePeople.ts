@@ -87,7 +87,7 @@ export const usePeople = () => {
         people.value.push(mapRow(data))
     }
 
-    const updatePerson = async (id: number, payload: Omit<Person, 'id' | 'userId' | 'createdAt'>) => {
+    const updatePerson = async (id: string, payload: Omit<Person, 'id' | 'userId' | 'createdAt'>) => {
         if (!user.value) throw new Error('Not authenticated')
         const { data, error: err } = await client
             .from('people')
@@ -100,7 +100,7 @@ export const usePeople = () => {
         people.value = people.value.map(p => (p.id === id ? mapRow(data) : p))
     }
 
-    const deletePerson = async (id: number) => {
+    const deletePerson = async (id: string) => {
         if (!user.value) throw new Error('Not authenticated')
         const { error: err } = await client
             .from('people')
@@ -117,7 +117,7 @@ export const usePeople = () => {
         error.value = null
     }
 
-    const getPersonById = (id: number) => people.value.find(p => p.id === id)
+    const getPersonById = (id: string) => people.value.find(p => p.id === id)
 
     watch(
         () => user.value?.id,

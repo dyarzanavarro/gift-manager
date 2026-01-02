@@ -27,8 +27,8 @@ const { people, loading, error, fetchPeople, addPerson, updatePerson, deletePers
 
 const isOpen = ref(false)
 const isEditing = ref(false)
-const editedId = ref<number | null>(null)
-
+const editedId = ref<string | null>(null) 
+  
 const form = reactive<Omit<Person, 'id'>>({
   name: '',
   birthday: '',
