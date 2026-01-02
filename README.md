@@ -1,4 +1,5 @@
 # Gift Tracker
+[![Netlify Status](https://api.netlify.com/api/v1/badges/a8de3b03-4a11-48b5-9287-c914c9c49c1c/deploy-status)](https://app.netlify.com/projects/thriving-eclair-3d1906/deploys)
 
 Eine webbasierte Anwendung zur persönlichen Verwaltung von Geschenkideen.  
 Der Gift Tracker ermöglicht es, Personen, Anlässe und Geschenkideen strukturiert zu erfassen und pro Benutzer dauerhaft zu speichern.
