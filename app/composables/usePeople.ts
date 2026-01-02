@@ -88,6 +88,7 @@ export const usePeople = () => {
     }
 
     const updatePerson = async (id: string, payload: Omit<Person, 'id' | 'userId' | 'createdAt'>) => {
+        if (!id) throw new Error('updatePerson: missing id')
         if (!user.value) throw new Error('Not authenticated')
         const { data, error: err } = await client
             .from('people')
@@ -101,6 +102,7 @@ export const usePeople = () => {
     }
 
     const deletePerson = async (id: string) => {
+        if (!id) throw new Error('deletePerson: missing id')
         if (!user.value) throw new Error('Not authenticated')
         const { error: err } = await client
             .from('people')

@@ -1,7 +1,7 @@
 export type GiftStatus = 'idea' | 'planned' | 'bought' | 'given';
 
 export interface GiftIdea {
-    id: number
+    id: string
     userId?: string
     personId: string
     occasionId: number

@@ -16,7 +16,7 @@ export default defineNuxtConfig({
   },
   nitro: {
     externals: {
-      inline: ['tslib']
+      inline: ['tslib', '@iconify/utils']
     }
   },
 
