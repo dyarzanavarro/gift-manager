@@ -10,6 +10,11 @@ export default defineNuxtConfig({
   routeRules: {
     '/': { prerender: false }
   },
+  nitro: {
+    externals: {
+      inline: ['tslib']
+    }
+  },
 
   compatibilityDate: '2025-01-15',
 
