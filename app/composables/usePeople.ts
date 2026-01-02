@@ -49,7 +49,6 @@ export const usePeople = () => {
         authSub?.unsubscribe()
     })
 
-    console.log('People supabase user', user.value?.id)
 
 
     const fetchPeople = async () => {

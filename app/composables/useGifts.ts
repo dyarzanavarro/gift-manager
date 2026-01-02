@@ -41,7 +41,6 @@ export const useGifts = () => {
     const ensureUser = async () => {
         const { data, error } = await client.auth.getSession()
         if (error) {
-            console.error('getSession error', error.message)
             return null
         }
         user.value = data.session?.user ?? null
@@ -63,8 +62,6 @@ export const useGifts = () => {
     onBeforeUnmount(() => {
         authSub?.unsubscribe()
     })
-
-    console.log('FGifts supabase user', user.value?.id)
 
 
     const fetchGifts = async () => {
@@ -107,7 +104,6 @@ export const useGifts = () => {
 
     const updateGift = async (id: number, payload: GiftUpsertPayload) => {
         if (!user.value) throw new Error('Not authenticated')
-
         const { data, error: err } = await client
             .from('gifts')
             .update(toDb(payload))
@@ -136,7 +132,7 @@ export const useGifts = () => {
         gifts.value = gifts.value.filter(g => g.id !== id)
     }
 
-    const getGiftsByPerson = (personId: number) =>
+    const getGiftsByPerson = (personId: string) =>
         computed(() => gifts.value.filter(g => g.personId === personId))
 
     const setStatus = async (id: number, status: GiftStatus) => {

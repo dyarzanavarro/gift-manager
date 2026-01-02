@@ -51,10 +51,7 @@ const onDeleteGift = async (g: GiftIdea) => {
   try { await deleteGift(g.id) } catch (err: any) { alert(err.message ?? 'Loeschen fehlgeschlagen.') }
 }
 
-watchEffect(() => {
-  console.log('route id', personId.value)
-  console.log('first person id', people.value?.[0]?.id)
-})
+
 
 const formatDateCH = (iso?: string | null) => {
   if (!iso) return '–'

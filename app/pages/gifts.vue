@@ -133,12 +133,13 @@ const onDelete = async (row: GiftRow) => {
 }
 
 const onSubmit = async () => {
+ 
   if (!form.title.trim()) return alert('Bitte einen Titel angeben.')
   if (!form.personId) return alert('Bitte eine Person auswählen.')
   if (!form.occasionId) return alert('Bitte einen Anlass auswählen.')
 
   const payload: Omit<GiftIdea, 'id'> = {
-    personId: Number(form.personId),
+    personId: form.personId,
     title: form.title.trim(),
     notes: form.notes.trim() || undefined,
     occasionId: form.occasionId,
@@ -158,6 +159,7 @@ const onSubmit = async () => {
     alert(err.message ?? 'Speichern fehlgeschlagen.')
   }
 }
+
 </script>
 
 <template>
