@@ -70,7 +70,7 @@ const signOut = async () => {
 
 <template>
   <div class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
-    <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur">
+    <header class="border-b border-slate-800 bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 backdrop-blur">
       <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <!-- Logo / Title -->
         <div class="flex items-center gap-3">
@@ -90,7 +90,7 @@ const signOut = async () => {
             :to="item.to"
             class="px-3 py-1.5 text-sm rounded-lg transition"
             :class="isActive(item.to)
-              ? 'bg-slate-800 text-white'
+              ? 'bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100'
               : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
             {{ item.label }}
@@ -111,7 +111,7 @@ const signOut = async () => {
       <!-- Mobile Navigation -->
       <div
         v-if="isMobileNavOpen"
-        class="md:hidden border-t border-slate-800 bg-slate-900"
+        class="md:hidden border-t border-slate-800 bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100"
       >
         <div class="px-4 py-2 flex flex-col gap-1">
           <NuxtLink
@@ -120,7 +120,7 @@ const signOut = async () => {
             :to="item.to"
             class="px-3 py-2 rounded-lg text-sm"
             :class="isActive(item.to)
-              ? 'bg-slate-800 text-white'
+              ? 'bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 text-white'
               : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
             @click="isMobileNavOpen = false"
           >

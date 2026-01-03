@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Person } from '~/models/person'
 import type { GiftIdea, GiftStatus } from '~/models/gift'
+import type { AISuggestion } from '~/composables/useAIGiftSuggestions'
 
 definePageMeta({ middleware: ['auth'] })
 
@@ -11,6 +12,80 @@ const { people, fetchPeople, loading, error } = usePeople()
 const { occasions } = useOccasions()
 const isGiftModalOpen = ref(false)
 const ready = ref(false)
+
+
+const isAiModalOpen = ref(false)
+
+type AiSuggestion = {
+  title: string
+  reason: string
+  category: string
+  priceHint: string
+}
+
+const isAiOpen = ref(false)
+const aiLoading = ref(false)
+const aiError = ref<string | null>(null)
+const aiHint = ref('')
+const aiSuggestions = ref<AiSuggestion[]>([])
+
+const openAiModal = () => {
+  aiError.value = null
+  aiHint.value = ''
+  aiSuggestions.value = []
+  isAiOpen.value = true
+}
+
+const fetchAiSuggestions = async () => {
+  if (!person.value) return
+  aiLoading.value = true
+  aiError.value = null
+  aiSuggestions.value = []
+
+  try {
+    const occId = giftForm.occasionId ?? occasions.value.find(o => o.name === 'Allgemein')?.id
+    if (!occId) throw new Error('Kein Anlass verfügbar (occasionId fehlt).')
+
+    const res = await $fetch<{ suggestions: AiSuggestion[] }>('/api/gift-suggestions', {
+      method: 'POST',
+      body: {
+        personId: person.value.id,
+        occasionId: occId,
+        hint: aiHint.value.trim() || undefined
+      }
+    })
+
+    aiSuggestions.value = res.suggestions
+  } catch (e: any) {
+    aiError.value = e?.data?.message || e?.message || 'KI-Vorschläge fehlgeschlagen.'
+  } finally {
+    aiLoading.value = false
+  }
+}
+
+const applySuggestion = async (s: AiSuggestion) => {
+  if (!person.value) return
+
+  const occId = giftForm.occasionId ?? occasions.value.find(o => o.name === 'Allgemein')?.id
+  if (!occId) return alert('Bitte zuerst einen Anlass wählen (oder Allgemein muss existieren).')
+
+  try {
+    await addGift({
+      personId: person.value.id,
+      occasionId: occId,
+      title: s.title,
+      status: 'idea',
+      notes: `Warum: ${s.reason}\nKategorie: ${s.category}\nPreis: ${s.priceHint}`,
+      link: undefined,
+      imageUrl: undefined
+    })
+    isAiOpen.value = false
+  } catch (err: any) {
+    alert(err.message ?? 'Übernehmen fehlgeschlagen.')
+  }
+}
+
+
 
 
 const { gifts, deleteGift, addGift, fetchGifts, loading: giftsLoading, error: giftsError } = useGifts()
@@ -56,7 +131,7 @@ const onDeleteGift = async (g: GiftIdea) => {
 const formatDateCH = (iso?: string | null) => {
   if (!iso) return '–'
   const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return iso // fallback, falls nicht ISO
+  if (Number.isNaN(d.getTime())) return iso // fallback
   return new Intl.DateTimeFormat('de-CH', {
     day: '2-digit',
     month: '2-digit',
@@ -169,7 +244,7 @@ const submitGiftForPerson = async () => {
             <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
               Aktuelle Geschenkideen
             </h2>
-            <div class="flex justify-end">
+            <div class="flex justify-end gap-4">
           <UButton
               @click="openGiftModal"
             color="primary"
@@ -177,10 +252,15 @@ const submitGiftForPerson = async () => {
           >
             Geschenkidee hinzufügen
           </UButton>
-
-          <UButton to="/people" color="neutral" variant="soft">
-            Zur Personenliste
-          </UButton>
+<UButton
+  @click="openAiModal"
+  color="neutral"
+  variant="soft"
+  icon="i-heroicons-sparkles"
+>
+  KI-Vorschläge
+</UButton>
+          
           </div>
         </div>
           </template>
@@ -323,6 +403,82 @@ const submitGiftForPerson = async () => {
           <UButton color="primary" type="submit">Hinzufügen</UButton>
         </div>
       </form>
+    </UCard>
+  </template>
+</UModal>
+
+<!-- AI Geschenkideen Modal -->
+<UModal v-model:open="isAiOpen" :ui="{ width: 'sm:max-w-2xl' }">
+  <template #content>
+    <UCard class="w-full max-w-2xl mx-auto space-y-4">
+      <template #header>
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h3 class="text-lg font-medium">KI-Vorschläge</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              5 Geschenkideen für {{ person?.name }} (Status: Idee)
+            </p>
+          </div>
+
+          <UButton
+            :loading="aiLoading"
+            color="primary"
+            icon="i-heroicons-arrow-path"
+            @click="fetchAiSuggestions"
+          >
+            Generieren
+          </UButton>
+        </div>
+      </template>
+
+      <UAlert v-if="aiError" color="error" variant="soft" icon="i-heroicons-exclamation-circle">
+        {{ aiError }}
+      </UAlert>
+
+      <div class="space-y-1">
+        <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+          Hinweis (optional)
+        </label>
+        <UInput v-model="aiHint" placeholder="z.B. Budget 30-50 CHF, mag Tech, mag Kaffee..." />
+      </div>
+
+      <div v-if="aiLoading" class="text-sm text-gray-500">Generiere Vorschläge…</div>
+
+      <div v-else class="space-y-3">
+        <UCard v-for="(s, idx) in aiSuggestions" :key="idx" class="p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="space-y-1">
+              <p class="font-medium">{{ s.title }}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ s.category }} · {{ s.priceHint }}
+              </p>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                {{ s.reason }}
+              </p>
+            </div>
+
+            <UButton
+              size="sm"
+              color="primary"
+              @click="applySuggestion(s)"
+            >
+              Übernehmen
+            </UButton>
+          </div>
+        </UCard>
+
+        <p v-if="aiSuggestions.length === 0" class="text-sm text-gray-500">
+          Noch keine Vorschläge. Klick auf “Generieren”.
+        </p>
+      </div>
+
+      <template #footer>
+        <div class="flex justify-end">
+          <UButton color="neutral" variant="soft" @click="isAiOpen = false">
+            Schließen
+          </UButton>
+        </div>
+      </template>
     </UCard>
   </template>
 </UModal>

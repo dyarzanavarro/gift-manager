@@ -1,9 +1,8 @@
 import type { GiftIdea, GiftStatus } from '~/models/gift'
 import { watch, onMounted } from 'vue'
 
-import type { User } from '@supabase/supabase-js'
 import type { Ref } from 'vue'
-
+import type { User } from '@supabase/supabase-js'
 
 export const useGifts = () => {
     const client = useSupabaseClient()
@@ -102,7 +101,7 @@ export const useGifts = () => {
         gifts.value.unshift(mapRow(data))
     }
 
-    const updateGift = async (id: number, payload: GiftUpsertPayload) => {
+    const updateGift = async (id: string, payload: GiftUpsertPayload) => {
         if (!user.value) throw new Error('Not authenticated')
         const { data, error: err } = await client
             .from('gifts')
@@ -121,7 +120,7 @@ export const useGifts = () => {
         error.value = null
     }
 
-    const deleteGift = async (id: number) => {
+    const deleteGift = async (id: string) => {
         if (!user.value) throw new Error('Not authenticated')
         const { error: err } = await client
             .from('gifts')
@@ -135,7 +134,7 @@ export const useGifts = () => {
     const getGiftsByPerson = (personId: string) =>
         computed(() => gifts.value.filter(g => g.personId === personId))
 
-    const setStatus = async (id: number, status: GiftStatus) => {
+    const setStatus = async (id: string, status: GiftStatus) => {
         const gift = gifts.value.find(g => g.id === id)
         if (!gift) return
 
