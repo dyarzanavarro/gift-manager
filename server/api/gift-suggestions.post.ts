@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
 
     if (!apiKey) throw createError({ statusCode: 500, statusMessage: "Missing OPENAI_API_KEY" })
 
-    const openai = new OpenAI({ apiKey, timeout: 8000 })
+    const openai = new OpenAI({ apiKey, timeout: 25000 })
 
     const prompt = `
 Erstelle exakt 3 Geschenkideen für diese Person und diesen Anlass.
@@ -79,20 +79,54 @@ Antworte als JSON im Format:
 }
 `.trim()
 
+    const responseSchema = {
+        type: "object",
+        properties: {
+            suggestions: {
+                type: "array",
+                minItems: 3,
+                maxItems: 3,
+                items: {
+                    type: "object",
+                    properties: {
+                        title: { type: "string" },
+                        reason: { type: "string" },
+                        category: { type: "string" },
+                        priceHint: { type: "string" }
+                    },
+                    required: ["title", "reason", "category", "priceHint"],
+                    additionalProperties: false
+                }
+            }
+        },
+        required: ["suggestions"],
+        additionalProperties: false
+    }
+
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 8000)
+    const timeoutId = setTimeout(() => controller.abort(), 25000)
     let resp
     try {
         resp = await openai.responses.create(
             {
                 model: "gpt-5-nano",
                 input: prompt,
-                max_output_tokens: 300
+                max_output_tokens: 1400,
+                reasoning: { effort: "minimal" },
+                text: {
+                    format: {
+                        type: "json_schema",
+                        name: "gift_suggestions",
+                        schema: responseSchema,
+                        strict: true
+                    },
+                    verbosity: "low"
+                }
             },
             { signal: controller.signal }
         )
     } catch (err: any) {
-        if (err?.name === "AbortError") {
+        if (err?.name === "AbortError" || err?.message === "Request was aborted.") {
             throw createError({ statusCode: 504, statusMessage: "AI request timed out" })
         }
         throw err
@@ -101,11 +135,18 @@ Antworte als JSON im Format:
     }
 
     const text =
-        (resp as any).output_text ||
-        (resp as any)?.output?.[0]?.content?.[0]?.text ||
-        ""
+        ((resp as any).output_text ||
+            (resp as any)?.output?.[0]?.content?.[0]?.text ||
+            "").trim()
 
-    if (!text) throw createError({ statusCode: 500, statusMessage: "Empty AI response" })
+    if (!text) {
+        console.error("OpenAI empty response", {
+            id: (resp as any)?.id,
+            error: (resp as any)?.error,
+            incomplete: (resp as any)?.incomplete_details
+        })
+        throw createError({ statusCode: 500, statusMessage: "Empty AI response" })
+    }
 
     let json: unknown
     try {
