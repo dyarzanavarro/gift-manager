@@ -89,11 +89,12 @@ export const useGifts = () => {
 
 
     const addGift = async (payload: GiftUpsertPayload) => {
-        if (!user.value) throw new Error('Not authenticated')
+        const u = await ensureUser()
+        if (!u) throw new Error('Not authenticated')
 
         const { data, error: err } = await client
             .from('gifts')
-            .insert([{ ...toDb(payload), user_id: user.value.id }])
+            .insert([{ ...toDb(payload), user_id: u.id }])
             .select('id, user_id, person_id, occasion_id, title, notes, status, link, image_url, created_at')
             .single()
 
