@@ -77,10 +77,11 @@ export const usePeople = () => {
 
 
     const addPerson = async (payload: Omit<Person, 'id' | 'userId' | 'createdAt'>) => {
-        if (!user.value) throw new Error('Not authenticated')
+        const u = await ensureUser()
+        if (!u) throw new Error('Not authenticated')
         const { data, error: err } = await client
             .from('people')
-            .insert([{ ...payload, user_id: user.value.id }])
+            .insert([{ ...payload, user_id: u.id }])
             .select('id, user_id, name, birthday, notes, created_at')
             .single()
         if (err) throw err
