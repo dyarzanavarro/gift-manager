@@ -24,7 +24,7 @@ const occasionItems = computed<SelectItem[]>(() =>
   }))
 )
 
-const rows = computed<GiftRow[]>(() => {
+const baseRows = computed<GiftRow[]>(() => {
   const list = gifts.value.map(g => {
     const person = people.value.find(p => p.id === g.personId)
     const occ = occasions.value.find(o => o.id === g.occasionId)
@@ -35,15 +35,8 @@ const rows = computed<GiftRow[]>(() => {
     }
   })
 
-  return list.sort((a, b) => {
-    const nameCompare = a.personName.localeCompare(b.personName, 'de-CH')
-    if (nameCompare !== 0) return nameCompare
-    const o = a.occasionName.localeCompare(b.occasionName, 'de-CH')
-    if (o !== 0) return o
-    return a.title.localeCompare(b.title, 'de-CH')
-  })
+  return list
 })
-
 const personItems = computed<SelectItem[]>(() =>
   people.value.map(p => ({
     label: p.name,
@@ -58,6 +51,69 @@ const statusItems: SelectItem[] = [
   { label: 'Überreicht', value: 'given' }
 ]
 
+const personFilterItems = computed<SelectItem[]>(() => [
+  { label: 'Alle Personen', value: null },
+  ...personItems.value
+])
+
+const occasionFilterItems = computed<SelectItem[]>(() => [
+  { label: 'Alle Anlaesse', value: null },
+  ...occasionItems.value
+])
+
+const statusFilterItems: SelectItem[] = [
+  { label: 'Alle Stati', value: null },
+  ...statusItems
+]
+
+type SortKey = 'person' | 'occasion' | 'status'
+type SortDir = 'asc' | 'desc'
+
+const selectedPersonId = ref<string | null>(null)
+const selectedOccasionId = ref<number | null>(null)
+const selectedStatus = ref<GiftStatus | null>(null)
+const sortKey = ref<SortKey>('person')
+const sortDir = ref<SortDir>('asc')
+
+const sortedRows = (list: GiftRow[]) => {
+  const direction = sortDir.value === 'asc' ? 1 : -1
+  return [...list].sort((a, b) => {
+    let compare = 0
+    if (sortKey.value === 'person') {
+      compare = a.personName.localeCompare(b.personName, 'de-CH')
+    } else if (sortKey.value === 'occasion') {
+      compare = a.occasionName.localeCompare(b.occasionName, 'de-CH')
+    } else {
+      compare = a.status.localeCompare(b.status, 'de-CH')
+    }
+    if (compare !== 0) return compare * direction
+    const titleCompare = a.title.localeCompare(b.title, 'de-CH')
+    if (titleCompare !== 0) return titleCompare * direction
+    return a.personName.localeCompare(b.personName, 'de-CH') * direction
+  })
+}
+
+const rows = computed<GiftRow[]>(() => {
+  let list = baseRows.value
+  if (selectedPersonId.value) {
+    list = list.filter(r => r.personId === selectedPersonId.value)
+  }
+  if (selectedOccasionId.value !== null) {
+    list = list.filter(r => r.occasionId === selectedOccasionId.value)
+  }
+  if (selectedStatus.value) {
+    list = list.filter(r => r.status === selectedStatus.value)
+  }
+  return sortedRows(list)
+})
+
+const clearFilters = () => {
+  selectedPersonId.value = null
+  selectedOccasionId.value = null
+  selectedStatus.value = null
+  sortKey.value = 'person'
+  sortDir.value = 'asc'
+}
 const columns: TableColumn<GiftRow>[] = [
   { accessorKey: 'title', header: 'Geschenkidee' },
   { accessorKey: 'personName', header: 'Person' },
@@ -182,10 +238,72 @@ const onSubmit = async () => {
 
       <UCard class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
         <template #header>
-          <div class="flex items-center justify-between">
-            <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
-              Geschenkideen
-            </h2>
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                Geschenkideen
+              </h2>
+            </div>
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <USelect
+                v-model="selectedPersonId"
+                :items="personFilterItems"
+                value-attribute="value"
+                option-attribute="label"
+                placeholder="Person filtern"
+                size="xs"
+                class="min-w-[180px]"
+              />
+              <USelect
+                v-model="selectedOccasionId"
+                :items="occasionFilterItems"
+                value-attribute="value"
+                option-attribute="label"
+                placeholder="Anlass filtern"
+                size="xs"
+                class="min-w-[180px]"
+              />
+              <USelect
+                v-model="selectedStatus"
+                :items="statusFilterItems"
+                value-attribute="value"
+                option-attribute="label"
+                placeholder="Status filtern"
+                size="xs"
+                class="min-w-[150px]"
+              />
+              <USelect
+                v-model="sortKey"
+                :items="[
+                  { label: 'Sort: Person', value: 'person' },
+                  { label: 'Sort: Anlass', value: 'occasion' },
+                  { label: 'Sort: Status', value: 'status' }
+                ]"
+                value-attribute="value"
+                option-attribute="label"
+                size="xs"
+                class="min-w-[140px]"
+              />
+              <USelect
+                v-model="sortDir"
+                :items="[
+                  { label: 'Aufsteigend', value: 'asc' },
+                  { label: 'Absteigend', value: 'desc' }
+                ]"
+                value-attribute="value"
+                option-attribute="label"
+                size="xs"
+                class="min-w-[140px]"
+              />
+              <UButton
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                @click="clearFilters"
+              >
+                Reset
+              </UButton>
+            </div>
             <div class="flex justify-end">
               <UButton
                 icon="i-heroicons-plus"
@@ -207,6 +325,12 @@ const onSubmit = async () => {
         </div>
 
         <UTable v-else :data="rows" :columns="columns">
+          <template #title-cell="{ row }">
+            <div class="max-w-[220px] whitespace-normal break-words leading-snug text-gray-900 dark:text-gray-100">
+              {{ row.original.title }}
+            </div>
+          </template>
+
           <template #personName-cell="{ row }">
             <span class="text-gray-900 dark:text-gray-100">
               <UButton
