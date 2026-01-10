@@ -76,7 +76,7 @@ const signOut = async () => {
         <div class="flex items-center gap-3">
          <nuxt-link to="/" class="flex items-center gap-2">
          
-            <span class="text-lg font-semibold text-white">
+            <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Geschenke-Manager
             </span>
           </nuxt-link>
