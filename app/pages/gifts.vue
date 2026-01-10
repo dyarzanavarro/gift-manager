@@ -114,6 +114,78 @@ const clearFilters = () => {
   sortKey.value = 'person'
   sortDir.value = 'asc'
 }
+
+const escapeHtml = (value: string) =>
+  value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+
+const exportToHtml = () => {
+  const list = rows.value
+  const now = new Date().toISOString().slice(0, 19).replace('T', ' ')
+  const rowsHtml = list
+    .map(r => `
+        <tr>
+          <td>${escapeHtml(r.title)}</td>
+          <td>${escapeHtml(r.personName)}</td>
+          <td>${escapeHtml(r.occasionName)}</td>
+          <td>${escapeHtml(r.status)}</td>
+          <td>${escapeHtml(r.link ?? '')}</td>
+        </tr>
+      `.trim())
+    .join('\n')
+
+  const html = `
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Geschenkideen Export</title>
+    <style>
+      body { font-family: Arial, Helvetica, sans-serif; padding: 24px; color: #0f172a; }
+      h1 { font-size: 20px; margin: 0 0 6px; }
+      .meta { color: #475569; font-size: 12px; margin-bottom: 16px; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; vertical-align: top; }
+      th { background: #f8fafc; font-size: 12px; letter-spacing: 0.02em; text-transform: uppercase; }
+      td { font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <h1>Geschenkideen</h1>
+    <div class="meta">Exportiert: ${escapeHtml(now)} | Eintraege: ${list.length}</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Titel</th>
+          <th>Person</th>
+          <th>Anlass</th>
+          <th>Status</th>
+          <th>Link</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rowsHtml || '<tr><td colspan="5">Keine Eintraege</td></tr>'}
+      </tbody>
+    </table>
+  </body>
+</html>
+  `.trim()
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `geschenkideen-export-${new Date().toISOString().slice(0, 10)}.html`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}
 const columns: TableColumn<GiftRow>[] = [
   { accessorKey: 'title', header: 'Geschenkidee' },
   { accessorKey: 'personName', header: 'Person' },
@@ -220,12 +292,24 @@ const onSubmit = async () => {
 
 <template>
   <UPage class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
-    <UPageHeader
-      title="Geschenkideen"
-      class="text-gray-900 dark:text-gray-100"
-      description="Verwalte Geschenkideen, Zuordnungen zu Personen, Anlässen und Status."
-    />
-
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+      <UPageHeader
+        title="Geschenkideen"
+        class="text-gray-900 dark:text-gray-100"
+        description="Verwalte Geschenkideen, Zuordnungen zu Personen, Anl?ssen und Status."
+      />
+      <div class="flex justify-end sm:pt-2">
+        <UButton
+          color="primary"
+          variant="soft"
+          size="sm"
+          icon="i-heroicons-arrow-down-tray"
+          @click="exportToHtml"
+        >
+          Export HTML
+        </UButton>
+      </div>
+    </div>
     <UContainer class="space-y-6">
       <UAlert
         v-if="error"
@@ -303,6 +387,7 @@ const onSubmit = async () => {
               >
                 Reset
               </UButton>
+            
             </div>
             <div class="flex justify-end">
               <UButton
