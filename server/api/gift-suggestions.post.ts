@@ -49,10 +49,10 @@ export default defineEventHandler(async (event) => {
 
     if (!apiKey) throw createError({ statusCode: 500, statusMessage: "Missing OPENAI_API_KEY" })
 
-    const openai = new OpenAI({ apiKey })
+    const openai = new OpenAI({ apiKey, timeout: 8000 })
 
     const prompt = `
-Erstelle exakt 5 Geschenkideen für diese Person und diesen Anlass.
+Erstelle exakt 3 Geschenkideen für diese Person und diesen Anlass.
 Die Vorschläge müssen realistisch und speicherbar sein (nur Titel + kurzer Grund).
 Vermeide Duplikate zu bestehenden Ideen.
 
@@ -79,10 +79,26 @@ Antworte als JSON im Format:
 }
 `.trim()
 
-    const resp = await openai.responses.create({
-        model: "gpt-5-nano",
-        input: prompt
-    })
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 8000)
+    let resp
+    try {
+        resp = await openai.responses.create(
+            {
+                model: "gpt-5-nano",
+                input: prompt,
+                max_output_tokens: 300
+            },
+            { signal: controller.signal }
+        )
+    } catch (err: any) {
+        if (err?.name === "AbortError") {
+            throw createError({ statusCode: 504, statusMessage: "AI request timed out" })
+        }
+        throw err
+    } finally {
+        clearTimeout(timeoutId)
+    }
 
     const text =
         (resp as any).output_text ||
@@ -105,7 +121,7 @@ Antworte als JSON im Format:
             reason: z.string().min(2),
             category: z.string().min(2),
             priceHint: z.string().min(2)
-        })).length(5)
+        })).length(3)
     })
 
     const parsed = Parsed.parse(json)
