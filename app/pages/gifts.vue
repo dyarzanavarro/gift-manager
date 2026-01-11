@@ -198,7 +198,7 @@ const columns: TableColumn<GiftRow>[] = [
 
 const isOpen = ref(false)
 const isEditing = ref(false)
-const editedId = ref<number | null>(null)
+const editedId = ref<string | null>(null)
 
 type GiftForm = {
   title: string
@@ -266,6 +266,10 @@ const onSubmit = async () => {
   if (!form.personId) return alert('Bitte eine Person auswählen.')
   if (!form.occasionId) return alert('Bitte einen Anlass auswählen.')
 
+  if (isEditing.value && !editedId.value) {
+    return alert('Diese Geschenkidee hat keine gültige ID.')
+  }
+
   const payload: Omit<GiftIdea, 'id'> = {
     personId: form.personId,
     title: form.title.trim(),
@@ -277,7 +281,7 @@ const onSubmit = async () => {
   }
 
   try {
-    if (isEditing.value && editedId.value !== null) {
+    if (isEditing.value && editedId.value) {
       await updateGift(editedId.value, payload)
     } else {
       await addGift(payload)
@@ -292,13 +296,12 @@ const onSubmit = async () => {
 
 <template>
   <UPage class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-      <UPageHeader
-        title="Geschenkideen"
-        class="text-gray-900 dark:text-gray-100"
-        description="Verwalte Geschenkideen, Zuordnungen zu Personen, Anl?ssen und Status."
-      />
-      <div class="flex justify-end sm:pt-2">
+    <UPageHeader
+      title="Geschenkideen"
+      class="text-gray-900 dark:text-gray-100"
+      description="Verwalte Geschenkideen, Zuordnungen zu Personen, Anlässen und Status."
+    >
+      <template #right>
         <UButton
           color="primary"
           variant="soft"
@@ -308,9 +311,9 @@ const onSubmit = async () => {
         >
           Export HTML
         </UButton>
-      </div>
-    </div>
-    <UContainer class="space-y-6">
+      </template>
+    </UPageHeader>
+<UContainer class="space-y-6">
       <UAlert
         v-if="error"
         color="error"
