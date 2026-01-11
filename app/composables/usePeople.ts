@@ -89,13 +89,15 @@ export const usePeople = () => {
     }
 
     const updatePerson = async (id: string, payload: Omit<Person, 'id' | 'userId' | 'createdAt'>) => {
-        if (!id) throw new Error('updatePerson: missing id')
-        if (!user.value) throw new Error('Not authenticated')
+        if (!id || id === 'undefined') throw new Error('updatePerson: missing id')
+        const u = await ensureUser()
+        const uid = u?.id
+        if (!uid) throw new Error('Not authenticated')
         const { data, error: err } = await client
             .from('people')
             .update({ ...payload })
             .eq('id', id)
-            .eq('user_id', user.value.id)
+            .eq('user_id', uid)
             .select('id, user_id, name, birthday, notes, created_at')
             .single()
         if (err) throw err

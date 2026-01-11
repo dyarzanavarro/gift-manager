@@ -194,7 +194,9 @@ const openGiftModal = () => {
 }
 
 const submitGiftForPerson = async () => {
-  // validation...
+  if (!person.value?.id) return alert('Keine gueltige Person ausgewaehlt.')
+  if (!giftForm.title.trim()) return alert('Bitte einen Titel angeben.')
+  if (!giftForm.occasionId) return alert('Bitte einen Anlass auswaehlen.')
   try {
     await addGift({
       personId: person.value.id,

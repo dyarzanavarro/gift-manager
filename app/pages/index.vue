@@ -49,33 +49,38 @@ const nextBirthdays = computed(() => {
   return list
 })
 
-const occasionNameById = (id: number) =>
-  occasions.value.find(o => o.id === id)?.name ?? 'Unbekannt'
+const personNameById = computed(() => {
+  const map = new Map<string, string>()
+  for (const p of people.value) map.set(p.id, p.name)
+  return map
+})
+
+const occasionNameById = computed(() => {
+  const map = new Map<number, string>()
+  for (const o of occasions.value) map.set(o.id, o.name)
+  return map
+})
 
 type GiftRow = GiftIdea & { personName: string; occasionName: string }
 
-const openGifts = computed<GiftRow[]>(() => {
-  const list = gifts.value
-    .filter(g => g.status !== 'given')
+const normalizeGifts = (status: GiftStatus) =>
+  gifts.value
+    .filter(g => g.status === status)
     .map(g => ({
       ...g,
-      personName: people.value.find(p => p.id === g.personId)?.name ?? 'Unbekannt',
-      occasionName: occasionNameById(g.occasionId)
+      personName: personNameById.value.get(g.personId) ?? 'Unbekannt',
+      occasionName: occasionNameById.value.get(g.occasionId) ?? 'Unbekannt'
     }))
+    .sort((a, b) => {
+      const o = a.occasionName.localeCompare(b.occasionName, 'de-CH')
+      if (o !== 0) return o
+      const p = a.personName.localeCompare(b.personName, 'de-CH')
+      if (p !== 0) return p
+      return a.title.localeCompare(b.title, 'de-CH')
+    })
 
-  // sort by occasion then person then status then title
-  const statusOrder: Record<GiftStatus, number> = { idea: 1, planned: 2, bought: 3, given: 4 }
-
-  return list.sort((a, b) => {
-    const o = a.occasionName.localeCompare(b.occasionName, 'de-CH')
-    if (o !== 0) return o
-    const p = a.personName.localeCompare(b.personName, 'de-CH')
-    if (p !== 0) return p
-    const s = statusOrder[a.status] - statusOrder[b.status]
-    if (s !== 0) return s
-    return a.title.localeCompare(b.title, 'de-CH')
-  })
-})
+const openIdeas = computed<GiftRow[]>(() => normalizeGifts('idea').slice(0, 5))
+const openPlanned = computed<GiftRow[]>(() => normalizeGifts('planned').slice(0, 5))
 
 const statusLabel = (s: GiftStatus) => {
   switch (s) {
@@ -155,26 +160,24 @@ const statusColor = (s: GiftStatus) => {
           </div>
         </UCard>
 
-               <!-- Open gifts -->
-        <UCard class="lg:col-span-2">
+               <!-- Gift ideas (Idee) -->
+        <UCard class="lg:col-span-1">
           <template #header>
             <div class="flex items-center justify-between">
               <h2 class="text-xl font-medium text-gray-900 dark:text-gray-100">
-                Offene Geschenkideen
+                Geschenkideen (Idee)
               </h2>
-              <UButton to="/gifts" size="xs" color="neutral" variant="ghost">
-                Verwalten
-              </UButton>
+           
             </div>
           </template>
 
           <div class="space-y-2">
-            <UCard v-for="g in openGifts.slice(0, 8)" :key="g.id" class="p-3">
+            <UCard v-for="g in openIdeas" :key="g.id" class="p-3">
               <div class="flex items-start justify-between gap-3">
                 <div class="space-y-1">
                   <div class="font-medium text-gray-900 dark:text-gray-100 text-lg">{{ g.title }}</div>
                   <div class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ g.personName }} · {{ g.occasionName }}
+                    {{ g.personName }} | {{ g.occasionName }}
                   </div>
                 </div>
 
@@ -184,13 +187,50 @@ const statusColor = (s: GiftStatus) => {
               </div>
             </UCard>
 
-            <p v-if="openGifts.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
-              Keine offenen Geschenkideen.
+            <p v-if="openIdeas.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
+              Keine Geschenkideen im Status "Idee".
             </p>
 
-            <div v-if="openGifts.length > 8" class="pt-2">
+            <div v-if="gifts.length > 0" class="pt-2">
+            
+            </div>
+          </div>
+        </UCard>
+
+        <!-- Gift ideas (Geplant) -->
+        <UCard class="lg:col-span-1">
+          <template #header>
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-medium text-gray-900 dark:text-gray-100">
+                Geschenkideen (Geplant)
+              </h2>
+            
+            </div>
+          </template>
+
+          <div class="space-y-2">
+            <UCard v-for="g in openPlanned" :key="g.id" class="p-3">
+              <div class="flex items-start justify-between gap-3">
+                <div class="space-y-1">
+                  <div class="font-medium text-gray-900 dark:text-gray-100 text-lg">{{ g.title }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ g.personName }} | {{ g.occasionName }}
+                  </div>
+                </div>
+
+                <UBadge size="xl" :color="statusColor(g.status)" variant="soft">
+                  {{ statusLabel(g.status) }}
+                </UBadge>
+              </div>
+            </UCard>
+
+            <p v-if="openPlanned.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
+              Keine Geschenkideen im Status "Geplant".
+            </p>
+
+            <div v-if="gifts.length > 0" class="pt-2">
               <UButton to="/gifts" color="primary" variant="soft" size="sm">
-                Alle offenen Geschenkideen anzeigen ({{ openGifts.length }})
+                Alle Geschenkideen anzeigen
               </UButton>
             </div>
           </div>
