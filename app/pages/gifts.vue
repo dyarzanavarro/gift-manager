@@ -300,9 +300,7 @@ const onSubmit = async () => {
       title="Geschenkideen"
       class="text-gray-900 dark:text-gray-100"
       description="Verwalte Geschenkideen, Zuordnungen zu Personen, Anlässen und Status."
-    >
-      <template #right>
-        <UButton
+    ><UButton
           color="primary"
           variant="soft"
           size="sm"
@@ -311,7 +309,6 @@ const onSubmit = async () => {
         >
           Export HTML
         </UButton>
-      </template>
     </UPageHeader>
 <UContainer class="space-y-6">
       <UAlert
