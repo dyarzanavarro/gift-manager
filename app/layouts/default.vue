@@ -92,7 +92,7 @@ const signOut = async () => {
             class="px-3 py-1.5 text-sm rounded-lg transition"
             :class="isActive(item.to)
               ? 'bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100'
-              : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+              : ' text-slate-900 hover:bg-slate-800 hover:text-white'"
           >
             {{ item.label }}
           </NuxtLink>
@@ -122,7 +122,7 @@ const signOut = async () => {
             class="px-3 py-2 rounded-lg text-sm"
             :class="isActive(item.to)
               ? 'bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 text-white'
-              : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+              : ' text-slate-900 hover:bg-slate-800 hover:text-white'"
             @click="isMobileNavOpen = false"
           >
             {{ item.label }}
