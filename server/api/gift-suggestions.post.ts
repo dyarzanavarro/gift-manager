@@ -34,7 +34,6 @@ export default defineEventHandler(async (event) => {
         .from("occasions")
         .select("id, name")
         .eq("id", occasionId)
-        .eq("user_id", user.id)
         .single()
 
     if (oErr || !occasion) throw createError({ statusCode: 404, statusMessage: "Occasion not found" })

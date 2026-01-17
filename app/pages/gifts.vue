@@ -203,7 +203,14 @@ const exportToHtml = () => {
 }
 
 const shareGift = async (row: GiftRow) => {
-  const text = row.title
+  const lines = [
+    `Geschenk: ${row.title}`,
+    `Person: ${row.personName}`,
+    `Anlass: ${row.occasionName}`,
+    `Status: ${statusLabel(row.status)}`
+  ]
+  if (row.link) lines.push(`Link: ${row.link}`)
+  const text = lines.join('\n')
   try {
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(text)
@@ -354,88 +361,84 @@ const onSubmit = async () => {
 
       <UCard class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
         <template #header>
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Geschenkideen
-              </h2>
-            </div>
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <USelect
-                v-model="selectedPersonId"
-                :items="personFilterItems"
-                value-attribute="value"
-                option-attribute="label"
-                placeholder="Person filtern"
-                size="xs"
-                class="min-w-[180px]"
-              />
-              <USelect
-                v-model="selectedOccasionId"
-                :items="occasionFilterItems"
-                value-attribute="value"
-                option-attribute="label"
-                placeholder="Anlass filtern"
-                size="xs"
-                class="min-w-[180px]"
-              />
-              <USelect
-                v-model="selectedStatus"
-                :items="statusFilterItems"
-                value-attribute="value"
-                option-attribute="label"
-                placeholder="Status filtern"
-                size="xs"
-                class="min-w-[150px]"
-              />
-              <USelect
-                v-model="sortKey"
-                :items="[
-                  { label: 'Sort: Person', value: 'person' },
-                  { label: 'Sort: Anlass', value: 'occasion' },
-                  { label: 'Sort: Status', value: 'status' }
-                ]"
-                value-attribute="value"
-                option-attribute="label"
-                size="xs"
-                class="min-w-[140px]"
-              />
-              <USelect
-                v-model="sortDir"
-                :items="[
-                  { label: 'Aufsteigend', value: 'asc' },
-                  { label: 'Absteigend', value: 'desc' }
-                ]"
-                value-attribute="value"
-                option-attribute="label"
-                size="xs"
-                class="min-w-[140px]"
-              />
-              <UButton
-                color="neutral"
-                variant="ghost"
-                size="xs"
-                @click="clearFilters"
-              >
-                Reset
-              </UButton>
-            
-            </div>
-            <div class="flex justify-end">
-              <UButton
-                icon="i-heroicons-plus"
-                color="primary"
-                class="font-bold"
-                variant="solid"
-                size="sm"
-                @click="onCreate"
-              >
-                <span class="hidden sm:inline">Neue Geschenkidee</span>
-                <span class="sm:hidden">Neue Idee</span>
-              </UButton>
-            </div>
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+              Geschenkideen
+            </h2>
+            <UButton
+              icon="i-heroicons-plus"
+              color="primary"
+              class="font-bold"
+              variant="solid"
+              size="sm"
+              @click="onCreate"
+            >
+              <span class="hidden sm:inline">Neue Geschenkidee</span>
+              <span class="sm:hidden">Neue Idee</span>
+            </UButton>
           </div>
         </template>
+
+        <div class="flex flex-col gap-2 px-4 pb-3 sm:flex-row sm:items-center">
+          <USelect
+            v-model="selectedPersonId"
+            :items="personFilterItems"
+            value-attribute="value"
+            option-attribute="label"
+            placeholder="Person filtern"
+            size="xs"
+            class="min-w-[180px]"
+          />
+          <USelect
+            v-model="selectedOccasionId"
+            :items="occasionFilterItems"
+            value-attribute="value"
+            option-attribute="label"
+            placeholder="Anlass filtern"
+            size="xs"
+            class="min-w-[180px]"
+          />
+          <USelect
+            v-model="selectedStatus"
+            :items="statusFilterItems"
+            value-attribute="value"
+            option-attribute="label"
+            placeholder="Status filtern"
+            size="xs"
+            class="min-w-[150px]"
+          />
+          <USelect
+            v-model="sortKey"
+            :items="[
+              { label: 'Sort: Person', value: 'person' },
+              { label: 'Sort: Anlass', value: 'occasion' },
+              { label: 'Sort: Status', value: 'status' }
+            ]"
+            value-attribute="value"
+            option-attribute="label"
+            size="xs"
+            class="min-w-[140px]"
+          />
+          <USelect
+            v-model="sortDir"
+            :items="[
+              { label: 'Aufsteigend', value: 'asc' },
+              { label: 'Absteigend', value: 'desc' }
+            ]"
+            value-attribute="value"
+            option-attribute="label"
+            size="xs"
+            class="min-w-[140px]"
+          />
+          <UButton
+            color="neutral"
+            variant="ghost"
+            size="xs"
+            @click="clearFilters"
+          >
+            Reset
+          </UButton>
+        </div>
 
         <div v-if="loading" class="p-3 text-sm text-gray-500">
           Lade Geschenkideen…

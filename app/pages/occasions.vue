@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Occasion, OccasionType } from '~/models/occasion'
-import type { TableColumn, SelectItem } from '@nuxt/ui'
+import type { Occasion } from '~/models/occasion'
+import type { TableColumn } from '@nuxt/ui'
 
 definePageMeta({ middleware: ['auth'] })
 
@@ -8,32 +8,15 @@ const { occasions, loading, error, fetchOccasions, addOccasion, updateOccasion, 
 
 const columns: TableColumn<Occasion>[] = [
   { accessorKey: 'name', header: 'Anlass' },
-  { accessorKey: 'type', header: 'Typ' },
   { id: 'actions', header: 'Aktionen' }
 ]
-
-const typeItems: SelectItem[] = [
-  { label: 'Geburtstag', value: 'birthday' },
-  { label: 'Weihnachten', value: 'christmas' },
-  { label: 'Benutzerdefiniert', value: 'custom' }
-]
-
-const typeLabel = (value: OccasionType) => {
-  switch (value) {
-    case 'birthday': return 'Geburtstag'
-    case 'christmas': return 'Weihnachten'
-    case 'custom': return 'Benutzerdefiniert'
-    default: return value
-  }
-}
 
 const isOpen = ref(false)
 const isEditing = ref(false)
 const editedId = ref<string | null>(null)
 
 const form = reactive<Omit<Occasion, 'id' | 'userId' | 'createdAt'>>({
-  name: '',
-  type: 'custom'
+  name: ''
 })
 
 onMounted(() => {
@@ -44,7 +27,6 @@ const resetForm = () => {
   isEditing.value = false
   editedId.value = null
   form.name = ''
-  form.type = 'custom'
 }
 
 const onCreate = () => {
@@ -56,7 +38,6 @@ const onEdit = (o: Occasion) => {
   isEditing.value = true
   editedId.value = o.id
   form.name = o.name
-  form.type = o.type
   isOpen.value = true
 }
 
@@ -124,12 +105,6 @@ const onSubmit = async () => {
         </div>
 
         <UTable v-else :data="occasions" :columns="columns">
-          <template #type-cell="{ row }">
-            <span class="text-gray-700 dark:text-gray-300">
-              {{ typeLabel(row.original.type) }}
-            </span>
-          </template>
-
           <template #actions-cell="{ row }">
             <div class="flex gap-2">
               <UButton
@@ -173,20 +148,6 @@ const onSubmit = async () => {
                 <UInput
                   v-model="form.name"
                   placeholder="z. B. Hochzeit, Jubiläum, ..."
-                  class="w-full"
-                />
-              </div>
-
-              <div class="space-y-1">
-                <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Typ
-                </label>
-                <USelect
-                  v-model="form.type"
-                  :items="typeItems"
-                  value-attribute="value"
-                  option-attribute="label"
-                  placeholder="Typ auswählen"
                   class="w-full"
                 />
               </div>

@@ -130,8 +130,15 @@ const onDeleteGift = async (g: GiftIdea) => {
   try { await deleteGift(g.id) } catch (err: any) { alert(err.message ?? 'Loeschen fehlgeschlagen.') }
 }
 
-const shareGift = async (g: GiftIdea) => {
-  const text = g.title
+const shareGift = async (g: GiftIdea & { occasionName?: string }) => {
+  const lines = [
+    `Geschenk: ${g.title}`,
+    `Person: ${person.value?.name ?? 'Unbekannt'}`,
+    `Anlass: ${g.occasionName ?? 'Unbekannt'}`,
+    `Status: ${statusLabel(g.status)}`
+  ]
+  if (g.link) lines.push(`Link: ${g.link}`)
+  const text = lines.join('\n')
   try {
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(text)
@@ -169,6 +176,21 @@ const stats = computed(() => {
     given: count('given')
   }
 })
+
+const statusLabel = (status: GiftStatus) => {
+  switch (status) {
+    case 'idea':
+      return 'Idee'
+    case 'planned':
+      return 'Geplant'
+    case 'bought':
+      return 'Gekauft'
+    case 'given':
+      return 'Überreicht'
+    default:
+      return status
+  }
+}
 
 type GiftCreateForm = {
   title: string

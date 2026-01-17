@@ -42,15 +42,15 @@ const birthdaysThisWeek = computed(() => {
   return people.value
     .filter(p => !!p.birthday)
     .map(p => ({ ...p, inDays: daysFromToday(p.birthday) }))
-    .filter(p => p.inDays <= 7)
+    .filter(p => p.inDays <= 30)
     .sort((a, b) => a.inDays - b.inDays)
 })
 
 const birthdayBannerText = computed(() => {
   const n = birthdaysThisWeek.value.length
   if (n === 0) return ''
-  if (n === 1) return '1 Geburtstag in den nächsten 7 Tagen'
-  return `${n} Geburtstage in den nächsten 7 Tagen`
+  if (n === 1) return '1 Geburtstag in den nächsten 30 Tagen'
+  return `${n} Geburtstage in den nächsten 30 Tagen`
 })
 
 const isBirthdayBannerDismissed = useState<boolean>(

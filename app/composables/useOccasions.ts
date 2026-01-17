@@ -15,15 +15,13 @@ export const useOccasions = () => {
         id: row.id,
         userId: row.user_id,
         name: row.name,
-        type: row.type,
         createdAt: row.created_at
     })
 
-    type OccasionUpsertPayload = Omit<Occasion, 'id' | 'userId' | 'createdAt'>
+    type OccasionUpsertPayload = Pick<Occasion, 'name'>
 
     const toDb = (p: OccasionUpsertPayload) => ({
-        name: p.name,
-        type: p.type
+        name: p.name
     })
 
     const ensureUser = async () => {
@@ -62,7 +60,7 @@ export const useOccasions = () => {
         error.value = null
         const { data, error: err } = await client
             .from('occasions')
-            .select('id, user_id, name, type, created_at')
+            .select('id, user_id, name, created_at')
             .eq('user_id', uid)
             .order('name', { ascending: true })
 
@@ -71,6 +69,7 @@ export const useOccasions = () => {
             occasions.value = []
         } else {
             occasions.value = (data ?? []).map(mapRow)
+            await ensureDefaultOccasions()
         }
         loading.value = false
     }
@@ -82,7 +81,7 @@ export const useOccasions = () => {
         const { data, error: err } = await client
             .from('occasions')
             .insert([{ ...toDb(payload), user_id: u.id }])
-            .select('id, user_id, name, type, created_at')
+            .select('id, user_id, name, created_at')
             .single()
 
         if (err) throw err
@@ -98,7 +97,7 @@ export const useOccasions = () => {
             .update(toDb(payload))
             .eq('id', id)
             .eq('user_id', uid)
-            .select('id, user_id, name, type, created_at')
+            .select('id, user_id, name, created_at')
             .single()
 
         if (err) throw err
@@ -120,6 +119,31 @@ export const useOccasions = () => {
         occasions.value = []
         loading.value = false
         error.value = null
+    }
+
+    const defaultOccasionNames = ['Geburtstag', 'Weihnachten']
+    const normalizeName = (value: string) => value.trim().toLowerCase()
+
+    const ensureDefaultOccasions = async () => {
+        if (!user.value?.id) return
+        const existing = new Set(occasions.value.map(o => normalizeName(o.name)))
+        const missing = defaultOccasionNames.filter(
+            name => !existing.has(normalizeName(name))
+        )
+        if (missing.length === 0) return
+
+        const { data, error: err } = await client
+            .from('occasions')
+            .insert(missing.map(name => ({ name, user_id: user.value?.id })))
+            .select('id, user_id, name, created_at')
+
+        if (err) {
+            error.value = err.message
+            return
+        }
+
+        const merged = [...occasions.value, ...(data ?? []).map(mapRow)]
+        occasions.value = merged.sort((a, b) => a.name.localeCompare(b.name, 'de-CH'))
     }
 
     watch(
