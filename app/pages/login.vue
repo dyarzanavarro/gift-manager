@@ -6,6 +6,7 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const errorMsg = ref<string | null>(null)
+const successMsg = ref<string | null>(null)
 
 watchEffect(() => {
   if (user.value) navigateTo('/') // nach Login auf Dashboard
@@ -14,6 +15,7 @@ watchEffect(() => {
 const signIn = async () => {
   loading.value = true
   errorMsg.value = null
+  successMsg.value = null
 
   const { error } = await client.auth.signInWithPassword({
     email: email.value,
@@ -27,6 +29,7 @@ const signIn = async () => {
 const signUp = async () => {
   loading.value = true
   errorMsg.value = null
+  successMsg.value = null
 
   const { error } = await client.auth.signUp({
     email: email.value,
@@ -34,7 +37,11 @@ const signUp = async () => {
   })
 
   loading.value = false
-  if (error) errorMsg.value = error.message
+  if (error) {
+    errorMsg.value = error.message
+  } else {
+    successMsg.value = 'Registrierung erfolgreich. Bitte bestätige deine E-Mail (auch im Spam-Ordner nachsehen).'
+  }
 }
 </script>
 
@@ -57,6 +64,7 @@ const signUp = async () => {
         </div>
 
         <p v-if="errorMsg" class="text-sm text-red-500">{{ errorMsg }}</p>
+        <p v-else-if="successMsg" class="text-sm text-gray-600">{{ successMsg }}</p>
       </UCard>
     </UContainer>
   </UPage>
