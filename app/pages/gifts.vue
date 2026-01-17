@@ -44,11 +44,26 @@ const personItems = computed<SelectItem[]>(() =>
   }))
 )
 
+const statusLabel = (status: GiftStatus) => {
+  switch (status) {
+    case 'idea':
+      return 'Idee'
+    case 'planned':
+      return 'Geplant'
+    case 'bought':
+      return 'Gekauft'
+    case 'given':
+      return 'Überreicht'
+    default:
+      return status
+  }
+}
+
 const statusItems: SelectItem[] = [
-  { label: 'Idee', value: 'idea' },
-  { label: 'Geplant', value: 'planned' },
-  { label: 'Gekauft', value: 'bought' },
-  { label: 'Überreicht', value: 'given' }
+  { label: statusLabel('idea'), value: 'idea' },
+  { label: statusLabel('planned'), value: 'planned' },
+  { label: statusLabel('bought'), value: 'bought' },
+  { label: statusLabel('given'), value: 'given' }
 ]
 
 const personFilterItems = computed<SelectItem[]>(() => [
@@ -57,7 +72,7 @@ const personFilterItems = computed<SelectItem[]>(() => [
 ])
 
 const occasionFilterItems = computed<SelectItem[]>(() => [
-  { label: 'Alle Anlaesse', value: null },
+  { label: 'Alle Anlässe', value: null },
   ...occasionItems.value
 ])
 
@@ -132,7 +147,7 @@ const exportToHtml = () => {
           <td>${escapeHtml(r.title)}</td>
           <td>${escapeHtml(r.personName)}</td>
           <td>${escapeHtml(r.occasionName)}</td>
-          <td>${escapeHtml(r.status)}</td>
+          <td>${escapeHtml(statusLabel(r.status))}</td>
           <td>${escapeHtml(r.link ?? '')}</td>
         </tr>
       `.trim())
@@ -157,7 +172,7 @@ const exportToHtml = () => {
   </head>
   <body>
     <h1>Geschenkideen</h1>
-    <div class="meta">Exportiert: ${escapeHtml(now)} | Eintraege: ${list.length}</div>
+    <div class="meta">Exportiert: ${escapeHtml(now)} | Einträge: ${list.length}</div>
     <table>
       <thead>
         <tr>
@@ -169,7 +184,7 @@ const exportToHtml = () => {
         </tr>
       </thead>
       <tbody>
-        ${rowsHtml || '<tr><td colspan="5">Keine Eintraege</td></tr>'}
+        ${rowsHtml || '<tr><td colspan="5">Keine Einträge</td></tr>'}
       </tbody>
     </table>
   </body>
@@ -464,15 +479,7 @@ const onSubmit = async () => {
                     : 'neutral'"
               variant="soft"
             >
-              {{
-                row.original.status === 'idea'
-                  ? 'Idee'
-                  : row.original.status === 'planned'
-                    ? 'Geplant'
-                    : row.original.status === 'bought'
-                      ? 'Gekauft'
-                      : 'Überreicht'
-              }}
+              {{ statusLabel(row.original.status) }}
             </UBadge>
           </template>
 

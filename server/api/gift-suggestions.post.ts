@@ -1,11 +1,9 @@
 import OpenAI from "openai"
 import { z } from "zod"
 import { serverSupabaseClient, serverSupabaseUser } from "#supabase/server"
-import { mockOccasions } from "~/data/mockOccasions"
-
 const BodySchema = z.object({
     personId: z.string().uuid(),
-    occasionId: z.coerce.number().int(),
+    occasionId: z.string().uuid(),
     hint: z.string().optional()
 })
 
@@ -32,8 +30,14 @@ export default defineEventHandler(async (event) => {
 
     if (pErr || !person) throw createError({ statusCode: 404, statusMessage: "Person not found" })
 
-    const occasion = mockOccasions.find(o => o.id === occasionId)
-    if (!occasion) throw createError({ statusCode: 404, statusMessage: "Occasion not found" })
+    const { data: occasion, error: oErr } = await client
+        .from("occasions")
+        .select("id, name")
+        .eq("id", occasionId)
+        .eq("user_id", user.id)
+        .single()
+
+    if (oErr || !occasion) throw createError({ statusCode: 404, statusMessage: "Occasion not found" })
 
     const { data: existing } = await client
         .from("gifts")

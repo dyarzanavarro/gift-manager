@@ -87,8 +87,8 @@ const onSubmit = async () => {
 <template>
   <UPage class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
     <UPageHeader
-      title="Anlaesse"
-      description="Verwalte Anlaesse fuer Geschenkideen."
+      title="Anlässe"
+      description="Verwalte Anlässe fuer Geschenkideen."
       class="text-gray-900 dark:text-gray-100"
     />
 
@@ -101,7 +101,7 @@ const onSubmit = async () => {
         <template #header>
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-medium text-gray-900 dark:text-gray-100">
-              Anlaesse
+              Anlässe
             </h2>
             <div class="flex justify-end">
               <UButton
@@ -117,10 +117,10 @@ const onSubmit = async () => {
           </div>
         </template>
 
-        <div v-if="loading" class="p-3 text-sm text-gray-500">Lade Anlaesse...</div>
+        <div v-if="loading" class="p-3 text-sm text-gray-500">Lade Anlässe...</div>
 
         <div v-else-if="occasions.length === 0" class="p-3 text-sm text-gray-500">
-          Noch keine Anlaesse vorhanden.
+          Noch keine Anlässe vorhanden.
         </div>
 
         <UTable v-else :data="occasions" :columns="columns">
@@ -186,7 +186,7 @@ const onSubmit = async () => {
                   :items="typeItems"
                   value-attribute="value"
                   option-attribute="label"
-                  placeholder="Typ auswaehlen"
+                  placeholder="Typ auswählen"
                   class="w-full"
                 />
               </div>
