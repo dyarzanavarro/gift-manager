@@ -187,7 +187,7 @@ const formatBirthday = (value?: string) => {
       <!-- PERSON MODAL & FORM -->
       <UModal v-model:open="isOpen" :ui="{ width: 'sm:max-w-xl' }">
         <template #content>
-          <UCard class="w-full max-w-xl mx-auto space-y-4">
+          <UCard class="w-full max-w-xl mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
             <template #header>
               <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                 {{ isEditing ? 'Person bearbeiten' : 'Neue Person anlegen' }}

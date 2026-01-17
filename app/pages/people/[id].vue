@@ -342,7 +342,7 @@ const submitGiftForPerson = async () => {
       </template>
       <UModal v-model:open="isGiftModalOpen" :ui="{ width: 'sm:max-w-xl' }">
   <template #content>
-     <UCard class="w-full max-w-xl mx-auto space-y-4">
+     <UCard class="w-full max-w-xl mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
       <template #header>
         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
           Neue Geschenkidee für {{ person?.name }}
@@ -416,7 +416,7 @@ const submitGiftForPerson = async () => {
 <!-- AI Geschenkideen Modal -->
 <UModal v-model:open="isAiOpen" :ui="{ width: 'sm:max-w-2xl' }">
   <template #content>
-    <UCard class="w-full max-w-2xl mx-auto space-y-4">
+    <UCard class="w-full max-w-2xl mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
       <template #header>
         <div class="flex items-center justify-between gap-2">
           <div>
