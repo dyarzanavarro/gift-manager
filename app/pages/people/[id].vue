@@ -130,6 +130,22 @@ const onDeleteGift = async (g: GiftIdea) => {
   try { await deleteGift(g.id) } catch (err: any) { alert(err.message ?? 'Loeschen fehlgeschlagen.') }
 }
 
+const shareGift = async (g: GiftIdea) => {
+  const text = g.title
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+    }
+    if (navigator.share) {
+      await navigator.share({ title: 'Geschenkidee', text })
+    } else {
+      alert('Geschenkidee kopiert.')
+    }
+  } catch (err: any) {
+    alert(err?.message ?? 'Teilen fehlgeschlagen.')
+  }
+}
+
 
 
 const formatDateCH = (iso?: string | null) => {
@@ -281,7 +297,10 @@ const submitGiftForPerson = async () => {
                       <p class="font-medium">{{ g.title }}</p>
                       <p class="text-xs text-gray-500 dark:text-gray-400">{{ g.occasionName }}</p>
                     </div>
-                    <UButton size="xs" color="primary" variant="ghost" icon="i-heroicons-trash" @click="onDeleteGift(g)" />
+                    <div class="flex items-center gap-1">
+                      <UButton size="xs" color="primary" variant="ghost" icon="i-heroicons-share" @click="shareGift(g)" />
+                      <UButton size="xs" color="primary" variant="ghost" icon="i-heroicons-trash" @click="onDeleteGift(g)" />
+                    </div>
                   </div>
                 </UCard>
                 <p v-if="groupedCurrent.idea.length === 0" class="text-xs text-gray-500 dark:text-gray-400">–</p>
@@ -297,7 +316,10 @@ const submitGiftForPerson = async () => {
                       <p class="font-medium">{{ g.title }}</p>
                       <p class="text-xs text-gray-500 dark:text-gray-400">{{ g.occasionName }}</p>
                     </div>
-                    <UButton size="xs" color="primary" variant="ghost" icon="i-heroicons-trash" @click="onDeleteGift(g)" />
+                    <div class="flex items-center gap-1">
+                      <UButton size="xs" color="primary" variant="ghost" icon="i-heroicons-share" @click="shareGift(g)" />
+                      <UButton size="xs" color="primary" variant="ghost" icon="i-heroicons-trash" @click="onDeleteGift(g)" />
+                    </div>
                   </div>
                 </UCard>
                 <p v-if="groupedCurrent.planned.length === 0" class="text-xs text-gray-500 dark:text-gray-400">–</p>
@@ -308,8 +330,13 @@ const submitGiftForPerson = async () => {
               <h3 class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">Gekauft</h3>
               <div class="space-y-2">
                 <UCard v-for="g in groupedCurrent.bought" :key="g.id" class="p-3">
-                  <p class="font-medium">{{ g.title }}</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ g.occasionName }}</p>
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <p class="font-medium">{{ g.title }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ g.occasionName }}</p>
+                    </div>
+                    <UButton size="xs" color="primary" variant="ghost" icon="i-heroicons-share" @click="shareGift(g)" />
+                  </div>
                 </UCard>
                 <p v-if="groupedCurrent.bought.length === 0" class="text-xs text-gray-500 dark:text-gray-400">–</p>
               </div>
@@ -331,6 +358,7 @@ const submitGiftForPerson = async () => {
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ g.occasionName }}</p>
                   <p v-if="g.notes" class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ g.notes }}</p>
                 </div>
+                <UButton size="xs" color="primary" variant="ghost" icon="i-heroicons-share" @click="shareGift(g)" />
               </div>
             </UCard>
 

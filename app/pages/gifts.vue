@@ -186,6 +186,22 @@ const exportToHtml = () => {
   link.remove()
   URL.revokeObjectURL(url)
 }
+
+const shareGift = async (row: GiftRow) => {
+  const text = row.title
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+    }
+    if (navigator.share) {
+      await navigator.share({ title: 'Geschenkidee', text })
+    } else {
+      alert('Geschenkidee kopiert.')
+    }
+  } catch (err: any) {
+    alert(err?.message ?? 'Teilen fehlgeschlagen.')
+  }
+}
 const columns: TableColumn<GiftRow>[] = [
   { accessorKey: 'title', header: 'Geschenkidee' },
   { accessorKey: 'personName', header: 'Person' },
@@ -498,6 +514,15 @@ const onSubmit = async () => {
 
           <template #actions-cell="{ row }">
             <div class="flex gap-2">
+              <UButton
+                size="xs"
+                color="primary"
+                variant="ghost"
+                icon="i-heroicons-share"
+                @click="shareGift(row.original)"
+              >
+                Teilen
+              </UButton>
               <UButton
                 size="xs"
                 color="primary"
