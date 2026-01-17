@@ -4,7 +4,7 @@ export interface GiftIdea {
     id: string
     userId?: string
     personId: string
-    occasionId: number
+    occasionId: string
     title: string
     notes?: string | null
     status: GiftStatus

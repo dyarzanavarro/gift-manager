@@ -43,7 +43,9 @@ const fetchAiSuggestions = async () => {
   aiSuggestions.value = []
 
   try {
-    const occId = giftForm.occasionId ?? occasions.value.find(o => o.name === 'Allgemein')?.id
+    const occId = giftForm.occasionId
+      ?? occasions.value.find(o => o.name === 'Allgemein')?.id
+      ?? occasions.value[0]?.id
     if (!occId) throw new Error('Kein Anlass verfügbar (occasionId fehlt).')
 
     const res = await $fetch<{ suggestions: AiSuggestion[] }>('/api/gift-suggestions', {
@@ -66,7 +68,9 @@ const fetchAiSuggestions = async () => {
 const applySuggestion = async (s: AiSuggestion) => {
   if (!person.value) return
 
-  const occId = giftForm.occasionId ?? occasions.value.find(o => o.name === 'Allgemein')?.id
+  const occId = giftForm.occasionId
+    ?? occasions.value.find(o => o.name === 'Allgemein')?.id
+    ?? occasions.value[0]?.id
   if (!occId) return alert('Bitte zuerst einen Anlass wählen (oder Allgemein muss existieren).')
 
   try {
@@ -152,7 +156,7 @@ const stats = computed(() => {
 
 type GiftCreateForm = {
   title: string
-  occasionId: number | null
+  occasionId: string | null
   status: GiftStatus
   link: string
   imageUrl: string

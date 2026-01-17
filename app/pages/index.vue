@@ -56,7 +56,7 @@ const personNameById = computed(() => {
 })
 
 const occasionNameById = computed(() => {
-  const map = new Map<number, string>()
+  const map = new Map<string, string>()
   for (const o of occasions.value) map.set(o.id, o.name)
   return map
 })

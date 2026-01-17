@@ -70,7 +70,7 @@ type SortKey = 'person' | 'occasion' | 'status'
 type SortDir = 'asc' | 'desc'
 
 const selectedPersonId = ref<string | null>(null)
-const selectedOccasionId = ref<number | null>(null)
+const selectedOccasionId = ref<string | null>(null)
 const selectedStatus = ref<GiftStatus | null>(null)
 const sortKey = ref<SortKey>('person')
 const sortDir = ref<SortDir>('asc')
@@ -204,7 +204,7 @@ type GiftForm = {
   title: string
   personId: string | null
   notes: string
-  occasionId: number | null
+  occasionId: string | null
   status: GiftStatus
   link: string
   imageUrl: string
@@ -300,7 +300,8 @@ const onSubmit = async () => {
       title="Geschenkideen"
       class="text-gray-900 dark:text-gray-100"
       description="Verwalte Geschenkideen, Zuordnungen zu Personen, Anlässen und Status."
-    ><UButton
+    >
+    <UButton
           color="primary"
           variant="soft"
           size="sm"

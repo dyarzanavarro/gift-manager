@@ -7,6 +7,7 @@ const isMobileNavOpen = ref(false)
 
 const navItems = [
   { label: 'Personen', to: '/people' },
+  { label: 'Anlässe', to: '/occasions' },
   { label: 'Geschenkideen', to: '/gifts' }
 ]
 
