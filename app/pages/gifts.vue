@@ -77,7 +77,7 @@ const occasionFilterItems = computed<SelectItem[]>(() => [
 ])
 
 const statusFilterItems: SelectItem[] = [
-  { label: 'Alle Stati', value: null },
+  { label: 'Alle Status', value: null },
   ...statusItems
 ]
 
