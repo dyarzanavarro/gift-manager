@@ -102,6 +102,7 @@ const signOut = async () => {
 
         <!-- Mobile Menu Button -->
         <UButton
+          v-if="user"
           class="md:hidden"
           icon="i-heroicons-bars-3"
           variant="ghost"

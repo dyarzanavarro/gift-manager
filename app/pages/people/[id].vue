@@ -499,7 +499,7 @@ const submitGiftForPerson = async () => {
           :items="occasionItems"
           value-attribute="value"
           option-attribute="label"
-          placeholder="Anlass waehlen"
+          placeholder="Anlass wählen"
           class="w-full"
         />
       </div>

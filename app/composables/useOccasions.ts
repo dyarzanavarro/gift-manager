@@ -107,6 +107,11 @@ export const useOccasions = () => {
     const deleteOccasion = async (id: string) => {
         if (!id) throw new Error('deleteOccasion: missing id')
         if (!user.value) throw new Error('Not authenticated')
+        const occ = occasions.value.find(o => o.id === id)
+        const occName = (occ?.name ?? '').trim().toLowerCase()
+        if (occName === 'geburtstag' || occName === 'weihnachten') {
+            throw new Error('Standard-Anlaesse koennen nicht geloescht werden.')
+        }
         const { error: err } = await client
             .from('occasions')
             .delete()

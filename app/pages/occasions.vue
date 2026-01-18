@@ -19,6 +19,11 @@ const form = reactive<Omit<Occasion, 'id' | 'userId' | 'createdAt'>>({
   name: ''
 })
 
+const isProtectedOccasion = (o: Occasion) => {
+  const name = o.name.trim().toLowerCase()
+  return name === 'geburtstag' || name === 'weihnachten'
+}
+
 onMounted(() => {
   fetchOccasions()
 })
@@ -42,6 +47,7 @@ const onEdit = (o: Occasion) => {
 }
 
 const onDelete = async (o: Occasion) => {
+  if (isProtectedOccasion(o)) return alert('Standard-Anlaesse koennen nicht geloescht werden.')
   if (!confirm(`Anlass "${o.name}" wirklich löschen?`)) return
   try {
     await deleteOccasion(o.id)
@@ -69,7 +75,7 @@ const onSubmit = async () => {
   <UPage class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
     <UPageHeader
       title="Anlässe"
-      description="Verwalte Anlässe fuer Geschenkideen."
+      description="Verwalte Anlässe für Geschenkideen."
       class="text-gray-900 dark:text-gray-100"
     />
 
@@ -122,9 +128,10 @@ const onSubmit = async () => {
                 color="primary"
                 variant="ghost"
                 icon="i-heroicons-trash"
+                :disabled="isProtectedOccasion(row.original)"
                 @click="onDelete(row.original)"
               >
-                Loeschen
+                Löschen
               </UButton>
             </div>
           </template>
@@ -163,7 +170,7 @@ const onSubmit = async () => {
                 </UButton>
 
                 <UButton color="primary" type="submit">
-                  {{ isEditing ? 'Speichern' : 'Hinzufuegen' }}
+                  {{ isEditing ? 'Speichern' : 'Hinzufügen' }}
                 </UButton>
               </div>
             </form>
