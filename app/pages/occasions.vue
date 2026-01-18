@@ -42,11 +42,11 @@ const onEdit = (o: Occasion) => {
 }
 
 const onDelete = async (o: Occasion) => {
-  if (!confirm(`Anlass "${o.name}" wirklich loeschen?`)) return
+  if (!confirm(`Anlass "${o.name}" wirklich löschen?`)) return
   try {
     await deleteOccasion(o.id)
   } catch (err: any) {
-    alert(err.message ?? 'Loeschen fehlgeschlagen.')
+    alert(err.message ?? 'Löschen fehlgeschlagen.')
   }
 }
 

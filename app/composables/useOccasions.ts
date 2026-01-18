@@ -105,6 +105,7 @@ export const useOccasions = () => {
     }
 
     const deleteOccasion = async (id: string) => {
+        if (!id) throw new Error('deleteOccasion: missing id')
         if (!user.value) throw new Error('Not authenticated')
         const { error: err } = await client
             .from('occasions')

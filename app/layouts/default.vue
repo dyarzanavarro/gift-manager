@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const isMobileNavOpen = ref(false)
+const user = useSupabaseUser()
 
 const navItems = [
   { label: 'Personen', to: '/people' },
@@ -84,7 +85,7 @@ const signOut = async () => {
         </div>
 
         <!-- Desktop Navigation -->
-        <div class="hidden md:flex items-center gap-1">
+        <div v-if="user" class="hidden md:flex items-center gap-1">
           <NuxtLink
             v-for="item in navItems"
             :key="item.to"
@@ -111,7 +112,7 @@ const signOut = async () => {
 
       <!-- Mobile Navigation -->
       <div
-        v-if="isMobileNavOpen"
+        v-if="isMobileNavOpen && user"
         class="md:hidden border-t border-slate-800 bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100"
       >
         <div class="px-4 py-2 flex flex-col gap-1">

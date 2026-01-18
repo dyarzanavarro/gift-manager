@@ -27,32 +27,33 @@ const isAiOpen = ref(false)
 const aiLoading = ref(false)
 const aiError = ref<string | null>(null)
 const aiHint = ref('')
+const aiOccasionId = ref<string | null>(null)
 const aiSuggestions = ref<AiSuggestion[]>([])
 
 const openAiModal = () => {
   aiError.value = null
   aiHint.value = ''
+  aiOccasionId.value = giftForm.occasionId
   aiSuggestions.value = []
   isAiOpen.value = true
 }
 
 const fetchAiSuggestions = async () => {
   if (!person.value) return
+  if (!aiOccasionId.value) return alert('Bitte zuerst einen Anlass wählen.')
   aiLoading.value = true
   aiError.value = null
   aiSuggestions.value = []
 
   try {
-    const occId = giftForm.occasionId
-      ?? occasions.value.find(o => o.name === 'Allgemein')?.id
-      ?? occasions.value[0]?.id
+    const occId = aiOccasionId.value
     if (!occId) throw new Error('Kein Anlass verfügbar (occasionId fehlt).')
 
     const res = await $fetch<{ suggestions: AiSuggestion[] }>('/api/gift-suggestions', {
       method: 'POST',
       body: {
         personId: person.value.id,
-        occasionId: occId,
+        occasionId: aiOccasionId.value,
         hint: aiHint.value.trim() || undefined
       }
     })
@@ -68,15 +69,13 @@ const fetchAiSuggestions = async () => {
 const applySuggestion = async (s: AiSuggestion) => {
   if (!person.value) return
 
-  const occId = giftForm.occasionId
-    ?? occasions.value.find(o => o.name === 'Allgemein')?.id
-    ?? occasions.value[0]?.id
+  const occId = aiOccasionId.value
   if (!occId) return alert('Bitte zuerst einen Anlass wählen (oder Allgemein muss existieren).')
 
   try {
     await addGift({
       personId: person.value.id,
-      occasionId: occId,
+      occasionId: aiOccasionId.value,
       title: s.title,
       status: 'idea',
       notes: `Warum: ${s.reason}\nKategorie: ${s.category}\nPreis: ${s.priceHint}`,
@@ -126,8 +125,8 @@ const groupedCurrent = computed(() => ({
 }))
 
 const onDeleteGift = async (g: GiftIdea) => {
-  if (!confirm(`"${g.title}" wirklich loeschen?`)) return
-  try { await deleteGift(g.id) } catch (err: any) { alert(err.message ?? 'Loeschen fehlgeschlagen.') }
+  if (!confirm(`"${g.title}" wirklich löschen?`)) return
+  try { await deleteGift(g.id) } catch (err: any) { alert(err.message ?? 'Löschen fehlgeschlagen.') }
 }
 
 const shareGift = async (g: GiftIdea & { occasionName?: string }) => {
@@ -490,6 +489,20 @@ const submitGiftForPerson = async () => {
       <UAlert v-if="aiError" color="error" variant="soft" icon="i-heroicons-exclamation-circle">
         {{ aiError }}
       </UAlert>
+
+      <div class="space-y-1">
+        <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
+          Anlass
+        </label>
+        <USelect
+          v-model="aiOccasionId"
+          :items="occasionItems"
+          value-attribute="value"
+          option-attribute="label"
+          placeholder="Anlass waehlen"
+          class="w-full"
+        />
+      </div>
 
       <div class="space-y-1">
         <label class="text-xs font-medium text-gray-700 dark:text-gray-300">
